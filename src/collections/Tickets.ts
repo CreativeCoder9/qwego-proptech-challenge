@@ -7,6 +7,7 @@ import {
   normalizeRelationId,
   type RequestUser,
 } from "@/src/lib/access";
+import { afterChangeTicket } from "@/src/hooks/tickets/afterChangeTicket";
 
 type TicketStatus = "open" | "assigned" | "in-progress" | "done";
 
@@ -174,6 +175,7 @@ export const Tickets: CollectionConfig = {
         return data;
       },
     ],
+    afterChange: [afterChangeTicket],
   },
   fields: [
     {

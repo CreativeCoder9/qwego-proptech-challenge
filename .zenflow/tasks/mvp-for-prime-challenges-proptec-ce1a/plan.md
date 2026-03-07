@@ -68,7 +68,8 @@ Define all Payload CMS collections with fields and access control rules.
 
 ---
 
-### [ ] Step: Business Logic Hooks & Seed Script
+### [x] Step: Business Logic Hooks & Seed Script
+<!-- chat-id: 02c05158-dee1-465e-9227-e488ab2847ff -->
 
 Implement afterChange hooks and demo seed data.
 

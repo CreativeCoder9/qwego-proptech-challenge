@@ -10,6 +10,8 @@ tmp/
 temp/
 public/media/
 media/
+payload.db
+payload.db-*
 .env
 .env.local
 .env.development.local
