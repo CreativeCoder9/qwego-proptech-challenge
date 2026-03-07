@@ -25,7 +25,7 @@ Justification:
 | CMS / Backend | Payload CMS v3 (`@payloadcms/next`) |
 | Database | SQLite via `@payloadcms/db-sqlite` |
 | Auth | Payload built-in JWT auth (HTTP-only cookies) |
-| File Storage | Local filesystem via `@payloadcms/plugin-cloud-storage` (local adapter) |
+| File Storage | Payload upload collection with local filesystem (`staticDir: public/media`) |
 | Email | Nodemailer with Ethereal/SMTP stub (no paid API) |
 | Runtime | Node.js v24 |
 | Package Manager | npm |
@@ -36,7 +36,6 @@ Justification:
 payload@3
 @payloadcms/next
 @payloadcms/db-sqlite
-@payloadcms/richtext-lexical
 @payloadcms/ui
 next@15
 react@19
@@ -71,7 +70,7 @@ sharp (image processing for Payload)
 | Field | Type | Notes |
 |---|---|---|
 | title | text | required |
-| description | richtext (Lexical) | required |
+| description | textarea | required |
 | images | array of upload (media) | optional, max 5 |
 | status | select | `open \| assigned \| in-progress \| done` |
 | priority | select | `low \| medium \| high \| critical` |
@@ -132,6 +131,13 @@ Payload built-in `uploadCollectionSlug` with:
 - **update status/assignedTo/priority**: manager
 - **update status (in-progress→done, assigned→in-progress)**: technician (own assigned)
 - **delete**: none (soft-delete via status if needed)
+- **backend-enforced status transition rules (`beforeChange`)**:
+  - Allowed graph: `open -> assigned -> in-progress -> done`
+  - Manager can set `assignedTo` and move `open -> assigned`
+  - Manager and assigned technician can move `assigned -> in-progress`
+  - Manager and assigned technician can move `in-progress -> done`
+  - Any backward/skipped transition (e.g. `open -> done`, `done -> in-progress`) is rejected with a validation error
+  - If status becomes `done`, `resolvedAt` is set; otherwise `resolvedAt` is cleared
 
 ### Activity Logs collection
 - **create**: server-side only (via hooks, no direct API writes from client)
@@ -149,6 +155,14 @@ Payload built-in `uploadCollectionSlug` with:
 ---
 
 ## Payload Hooks (Business Logic)
+
+### `tickets` beforeChange hook
+Runs on create/update before persistence:
+
+1. Resolve the authenticated user from `req.user` and enforce role-based mutation rules server-side
+2. Validate status transitions against the allowed graph (`open -> assigned -> in-progress -> done`)
+3. Validate that technician status updates are allowed only when `assignedTo === req.user.id`
+4. Reject unauthorized field edits (e.g., tenant editing `status`, `assignedTo`, `priority`)
 
 ### `tickets` afterChange hook
 Fires when a ticket is created or updated:
@@ -197,10 +211,6 @@ app/
 ├── api/
 │   └── [...slug]/
 │       └── route.ts            # Payload REST API handler
-└── (payload)/
-    └── admin/
-        └── [[...segments]]/
-            └── page.tsx        # Payload admin UI
 ```
 
 ---
@@ -210,8 +220,11 @@ app/
 ### Auth Flow
 - Login via Payload's `/api/users/login` REST endpoint
 - Auth state in a React Context (`AuthContext`) reading from `/api/users/me`
-- Protected routes via middleware (`middleware.ts`) checking `payload-token` cookie
-- Role-based redirect in middleware
+- Middleware checks presence of `payload-token` only for coarse auth gating (`/login` vs protected app)
+- Verified authorization is enforced server-side per request:
+  - App layout/page loaders resolve current user via Payload local API (`getCurrentUser()`), not cookie presence alone
+  - Role guard map restricts route groups (tenant, manager, technician) and redirects unauthorized users
+  - Payload collection access rules remain defense-in-depth for API mutations/reads
 
 ### Key Frontend Components
 
@@ -321,6 +334,8 @@ qwego-proptech-challenge/
 └── .zenflow/
     └── tasks/...
 ```
+
+`.gitignore` should ignore generated uploads under `public/media/*` (while keeping the folder itself tracked if needed).
 
 ---
 
