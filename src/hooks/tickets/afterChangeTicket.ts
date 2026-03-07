@@ -17,6 +17,63 @@ type TicketDoc = {
 
 type NotificationType = "ticket-created" | "ticket-assigned" | "status-update";
 
+const getUserNameById = async ({
+  req,
+  userId,
+}: {
+  req: Parameters<CollectionAfterChangeHook>[0]["req"];
+  userId: number | string | undefined;
+}): Promise<string | undefined> => {
+  if (!userId) {
+    return undefined;
+  }
+
+  const user = await req.payload.findByID({
+    id: userId,
+    collection: "users",
+    depth: 0,
+    overrideAccess: true,
+    req,
+  });
+
+  const name = (user as { name?: string } | null | undefined)?.name;
+  return name || undefined;
+};
+
+const findAllManagers = async (
+  req: Parameters<CollectionAfterChangeHook>[0]["req"],
+): Promise<Array<{ id: number | string }>> => {
+  const managers: Array<{ id: number | string }> = [];
+  let page = 1;
+  const limit = 100;
+
+  while (true) {
+    const response = await req.payload.find({
+      collection: "users",
+      depth: 0,
+      limit,
+      overrideAccess: true,
+      page,
+      req,
+      where: {
+        role: {
+          equals: "manager",
+        },
+      },
+    });
+
+    managers.push(...response.docs.map((doc) => ({ id: doc.id })));
+
+    if (!response.hasNextPage) {
+      break;
+    }
+
+    page += 1;
+  }
+
+  return managers;
+};
+
 const createNotification = async ({
   message,
   recipient,
@@ -69,21 +126,10 @@ export const afterChangeTicket: CollectionAfterChangeHook = async ({
       ticket: currentTicket,
     });
 
-    const managers = await req.payload.find({
-      collection: "users",
-      depth: 0,
-      limit: 100,
-      overrideAccess: true,
-      req,
-      where: {
-        role: {
-          equals: "manager",
-        },
-      },
-    });
+    const managers = await findAllManagers(req);
 
     await Promise.all(
-      managers.docs.map(async (manager) =>
+      managers.map(async (manager) =>
         createNotification({
           message: `New maintenance ticket: "${currentTicket.title ?? "Untitled"}".`,
           recipient: manager.id,
@@ -97,6 +143,10 @@ export const afterChangeTicket: CollectionAfterChangeHook = async ({
     return doc;
   }
 
+  if (operation !== "update") {
+    return doc;
+  }
+
   const previousStatus = previousTicket?.status;
   const nextStatus = currentTicket.status;
   const previousPriority = previousTicket?.priority;
@@ -107,14 +157,18 @@ export const afterChangeTicket: CollectionAfterChangeHook = async ({
   let assignedTechnicianNotified = false;
 
   if (previousAssignedTo !== nextAssignedTo) {
+    const assigneeName = await getUserNameById({ req, userId: nextAssignedTo });
+    const assigneeLabel = assigneeName ?? (nextAssignedTo ? `technician ${nextAssignedTo}` : "none");
+
     await createActivityLog({
       action: "assigned",
       actor: actor?.id,
       details: {
         from: previousAssignedTo ?? null,
         to: nextAssignedTo ?? null,
+        assigneeName: assigneeName ?? null,
       },
-      message: `Ticket assigned to technician ${nextAssignedTo ?? "none"}.`,
+      message: `Ticket assigned to ${assigneeLabel}.`,
       req,
       ticket: currentTicket,
     });

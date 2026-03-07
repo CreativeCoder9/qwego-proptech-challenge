@@ -42,7 +42,18 @@ const upsertUser = async (payload: PayloadClient, user: SeedUserInput) => {
   });
 
   if (existing.docs[0]) {
-    return existing.docs[0];
+    return payload.update({
+      id: existing.docs[0].id,
+      collection: "users",
+      data: {
+        name: user.name,
+        password: user.password,
+        phone: user.phone,
+        role: user.role,
+        unit: user.unit,
+      },
+      overrideAccess: true,
+    });
   }
 
   return payload.create({
@@ -59,24 +70,73 @@ const upsertTicket = async (payload: PayloadClient, ticket: SeedTicketInput) => 
     limit: 1,
     overrideAccess: true,
     where: {
-      title: {
-        equals: ticket.title,
-      },
+      and: [
+        {
+          title: {
+            equals: ticket.title,
+          },
+        },
+        {
+          tenant: {
+            equals: ticket.tenant,
+          },
+        },
+        {
+          unit: {
+            equals: ticket.unit,
+          },
+        },
+      ],
     },
   });
 
   if (existing.docs[0]) {
-    return existing.docs[0];
+    return payload.update({
+      id: existing.docs[0].id,
+      collection: "tickets",
+      data: {
+        assignedTo: ticket.assignedTo,
+        building: ticket.building,
+        category: ticket.category,
+        description: ticket.description,
+        priority: ticket.priority,
+        status: ticket.status,
+        tenant: ticket.tenant,
+        title: ticket.title,
+        unit: ticket.unit,
+      },
+      overrideAccess: true,
+    });
   }
 
   return payload.create({
     collection: "tickets",
-    data: ticket,
+    data: {
+      assignedTo: ticket.assignedTo,
+      building: ticket.building,
+      category: ticket.category,
+      description: ticket.description,
+      priority: ticket.priority,
+      status: ticket.status,
+      tenant: ticket.tenant,
+      title: ticket.title,
+      unit: ticket.unit,
+    },
     overrideAccess: true,
   });
 };
 
 const run = async () => {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("Seed script is blocked in production.");
+  }
+
+  const seedPassword = process.env.SEED_PASSWORD;
+
+  if (!seedPassword || seedPassword.length < 12) {
+    throw new Error("SEED_PASSWORD must be set and at least 12 characters long.");
+  }
+
   console.log("Seed: preparing environment...");
   // Work around tsx + @next/env CJS interop on Node 24 during payload env loading.
   const require = createRequire(import.meta.url);
@@ -98,7 +158,7 @@ const run = async () => {
   const manager = await upsertUser(payload, {
     email: "manager@qwego.local",
     name: "Maya Manager",
-    password: "Passw0rd!",
+    password: seedPassword,
     phone: "+1 555-0100",
     role: "manager",
   });
@@ -106,7 +166,7 @@ const run = async () => {
   const technicianA = await upsertUser(payload, {
     email: "tech.ajay@qwego.local",
     name: "Ajay Technician",
-    password: "Passw0rd!",
+    password: seedPassword,
     phone: "+1 555-0101",
     role: "technician",
   });
@@ -114,7 +174,7 @@ const run = async () => {
   const technicianB = await upsertUser(payload, {
     email: "tech.nina@qwego.local",
     name: "Nina Technician",
-    password: "Passw0rd!",
+    password: seedPassword,
     phone: "+1 555-0102",
     role: "technician",
   });
@@ -122,7 +182,7 @@ const run = async () => {
   const tenantA = await upsertUser(payload, {
     email: "tenant.alex@qwego.local",
     name: "Alex Tenant",
-    password: "Passw0rd!",
+    password: seedPassword,
     phone: "+1 555-0103",
     role: "tenant",
     unit: "A-102",
@@ -131,7 +191,7 @@ const run = async () => {
   const tenantB = await upsertUser(payload, {
     email: "tenant.sam@qwego.local",
     name: "Sam Tenant",
-    password: "Passw0rd!",
+    password: seedPassword,
     phone: "+1 555-0104",
     role: "tenant",
     unit: "B-305",
@@ -198,6 +258,7 @@ const run = async () => {
   }
 
   console.log("Seed complete.");
+  console.log(`Seed password source: SEED_PASSWORD (${seedPassword.length} chars)`);
   console.log(`Manager: ${manager.email}`);
   console.log(`Technicians: ${technicianA.email}, ${technicianB.email}`);
   console.log(`Tenants: ${tenantA.email}, ${tenantB.email}`);

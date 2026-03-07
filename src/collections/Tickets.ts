@@ -110,6 +110,8 @@ export const Tickets: CollectionConfig = {
         if (operation === "update") {
           const previousStatus = originalDoc?.status as TicketStatus | undefined;
           const incomingStatus = (data.status ?? previousStatus) as TicketStatus | undefined;
+          const previousAssignedTo = normalizeRelationId(originalDoc?.assignedTo);
+          const incomingAssignedTo = normalizeRelationId(data.assignedTo ?? originalDoc?.assignedTo);
 
           if (isTechnician(user)) {
             const assignedTo = normalizeRelationId(originalDoc?.assignedTo);
@@ -165,6 +167,44 @@ export const Tickets: CollectionConfig = {
                 ],
               });
             }
+          }
+
+          // Keep status and assignment in sync with the defined workflow.
+          if (!previousAssignedTo && incomingAssignedTo && incomingStatus === "open") {
+            data.status = "assigned";
+          }
+
+          if (previousAssignedTo && !incomingAssignedTo && incomingStatus !== "open") {
+            throw new ValidationError({
+              errors: [
+                {
+                  message: "Cannot clear assigned technician unless status is open.",
+                  path: "assignedTo",
+                },
+              ],
+            });
+          }
+
+          if (incomingStatus === "assigned" && !incomingAssignedTo) {
+            throw new ValidationError({
+              errors: [
+                {
+                  message: "Assigned status requires an assigned technician.",
+                  path: "assignedTo",
+                },
+              ],
+            });
+          }
+
+          if ((incomingStatus === "in-progress" || incomingStatus === "done") && !incomingAssignedTo) {
+            throw new ValidationError({
+              errors: [
+                {
+                  message: `${incomingStatus} status requires an assigned technician.`,
+                  path: "assignedTo",
+                },
+              ],
+            });
           }
 
           if (incomingStatus === "done") {
