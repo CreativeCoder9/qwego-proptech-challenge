@@ -36,6 +36,7 @@ Created `spec.md` with full technical specification:
 ---
 
 ### [ ] Step: Project Bootstrap
+<!-- chat-id: 4559cccb-b946-4d0d-8804-8f413c928d09 -->
 
 Scaffold the base application from scratch.
 
