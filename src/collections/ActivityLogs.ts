@@ -1,15 +1,5 @@
 import type { Access, CollectionConfig, Where } from "payload";
-
-type UserRole = "tenant" | "manager" | "technician";
-
-type RequestUser = {
-  id: number | string;
-  role?: UserRole;
-};
-
-const isManager = (user?: RequestUser | null) => user?.role === "manager";
-const isTenant = (user?: RequestUser | null) => user?.role === "tenant";
-const isTechnician = (user?: RequestUser | null) => user?.role === "technician";
+import { isManager, isTechnician, isTenant, type RequestUser } from "@/src/lib/access";
 
 const canReadActivityLogs: Access = ({ req }) => {
   const user = req.user as RequestUser | null | undefined;
@@ -23,20 +13,20 @@ const canReadActivityLogs: Access = ({ req }) => {
   }
 
   if (isTenant(user)) {
-    const where = {
-      "ticket.tenant": {
+    const where: Where = {
+      tenant: {
         equals: user.id,
       },
-    } as Where;
+    };
     return where;
   }
 
   if (isTechnician(user)) {
-    const where = {
-      "ticket.assignedTo": {
+    const where: Where = {
+      assignedTo: {
         equals: user.id,
       },
-    } as Where;
+    };
     return where;
   }
 
@@ -75,6 +65,27 @@ export const ActivityLogs: CollectionConfig = {
         { label: "Priority Changed", value: "priority-changed" },
         { label: "Comment Added", value: "comment-added" },
       ],
+    },
+    {
+      name: "tenant",
+      type: "relationship",
+      relationTo: "users",
+      required: true,
+      filterOptions: {
+        role: {
+          equals: "tenant",
+        },
+      },
+    },
+    {
+      name: "assignedTo",
+      type: "relationship",
+      relationTo: "users",
+      filterOptions: {
+        role: {
+          equals: "technician",
+        },
+      },
     },
     {
       name: "details",

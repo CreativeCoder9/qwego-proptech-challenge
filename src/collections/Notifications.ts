@@ -1,8 +1,5 @@
 import type { Access, CollectionConfig } from "payload";
-
-type RequestUser = {
-  id: number | string;
-};
+import { type RequestUser } from "@/src/lib/access";
 
 const canReadNotifications: Access = ({ req }) => {
   const user = req.user as RequestUser | null | undefined;

@@ -1,13 +1,5 @@
 import type { Access, CollectionConfig } from "payload";
-
-type UserRole = "tenant" | "manager" | "technician";
-
-type RequestUser = {
-  id: number | string;
-  role?: UserRole;
-};
-
-const isManager = (user?: RequestUser | null) => user?.role === "manager";
+import { isManager, type RequestUser } from "@/src/lib/access";
 
 const canReadUsers: Access = ({ req }) => {
   const user = req.user as RequestUser | null | undefined;

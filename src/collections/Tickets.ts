@@ -1,15 +1,21 @@
 import type { Access, CollectionConfig, Where } from "payload";
+import { ValidationError } from "payload";
+import {
+  isManager,
+  isTechnician,
+  isTenant,
+  normalizeRelationId,
+  type RequestUser,
+} from "@/src/lib/access";
 
-type UserRole = "tenant" | "manager" | "technician";
+type TicketStatus = "open" | "assigned" | "in-progress" | "done";
 
-type RequestUser = {
-  id: number | string;
-  role?: UserRole;
+const nextStatus: Record<TicketStatus, TicketStatus[]> = {
+  open: ["assigned"],
+  assigned: ["in-progress"],
+  "in-progress": ["done"],
+  done: [],
 };
-
-const isManager = (user?: RequestUser | null) => user?.role === "manager";
-const isTenant = (user?: RequestUser | null) => user?.role === "tenant";
-const isTechnician = (user?: RequestUser | null) => user?.role === "technician";
 
 const canReadTickets: Access = ({ req }) => {
   const user = req.user as RequestUser | null | undefined;
@@ -73,6 +79,101 @@ export const Tickets: CollectionConfig = {
     read: canReadTickets,
     update: canUpdateTickets,
     delete: () => false,
+  },
+  hooks: {
+    beforeValidate: [
+      ({ data, operation, req }) => {
+        const user = req.user as RequestUser | null | undefined;
+
+        if (!data || !user) {
+          return data;
+        }
+
+        if (operation === "create" && isTenant(user)) {
+          data.tenant = user.id;
+          data.status = "open";
+          data.assignedTo = undefined;
+        }
+
+        return data;
+      },
+    ],
+    beforeChange: [
+      ({ data, operation, originalDoc, req }) => {
+        const user = req.user as RequestUser | null | undefined;
+
+        if (!data || !user) {
+          return data;
+        }
+
+        if (operation === "update") {
+          const previousStatus = originalDoc?.status as TicketStatus | undefined;
+          const incomingStatus = (data.status ?? previousStatus) as TicketStatus | undefined;
+
+          if (isTechnician(user)) {
+            const assignedTo = normalizeRelationId(originalDoc?.assignedTo);
+
+            if (!assignedTo || String(assignedTo) !== String(user.id)) {
+              throw new ValidationError({
+                errors: [
+                  {
+                    message: "Only the assigned technician can update this ticket.",
+                    path: "assignedTo",
+                  },
+                ],
+              });
+            }
+
+            const forbiddenTechnicianFields = [
+              "assignedTo",
+              "priority",
+              "tenant",
+              "title",
+              "description",
+              "category",
+              "images",
+              "unit",
+              "building",
+            ] as const;
+
+            for (const field of forbiddenTechnicianFields) {
+              if (field in data) {
+                throw new ValidationError({
+                  errors: [
+                    {
+                      message: `Technicians cannot update ${field}.`,
+                      path: field,
+                    },
+                  ],
+                });
+              }
+            }
+          }
+
+          if (previousStatus && incomingStatus && previousStatus !== incomingStatus) {
+            const allowed = nextStatus[previousStatus];
+            const transitionAllowed = allowed.includes(incomingStatus);
+
+            if (!transitionAllowed) {
+              throw new ValidationError({
+                errors: [
+                  {
+                    message: `Invalid status transition from ${previousStatus} to ${incomingStatus}.`,
+                    path: "status",
+                  },
+                ],
+              });
+            }
+          }
+
+          if (incomingStatus === "done") {
+            data.resolvedAt = new Date().toISOString();
+          }
+        }
+
+        return data;
+      },
+    ],
   },
   fields: [
     {
@@ -168,7 +269,10 @@ export const Tickets: CollectionConfig = {
       },
       defaultValue: ({ req }) => (req.user as RequestUser | null | undefined)?.id,
       access: {
-        create: ({ req }) => isManager(req.user as RequestUser | null | undefined),
+        create: ({ req }) => {
+          const user = req.user as RequestUser | null | undefined;
+          return isTenant(user) || isManager(user);
+        },
         update: ({ req }) => isManager(req.user as RequestUser | null | undefined),
       },
     },

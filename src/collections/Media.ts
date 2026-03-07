@@ -1,13 +1,5 @@
 import type { CollectionConfig } from "payload";
-
-type UserRole = "tenant" | "manager" | "technician";
-
-type RequestUser = {
-  role?: UserRole;
-};
-
-const isAuthenticated = (user?: RequestUser | null) => Boolean(user);
-const isManager = (user?: RequestUser | null) => user?.role === "manager";
+import { isAuthenticated, isManager, type RequestUser } from "@/src/lib/access";
 
 export const Media: CollectionConfig = {
   slug: "media",
@@ -18,7 +10,7 @@ export const Media: CollectionConfig = {
     delete: ({ req }) => isManager(req.user as RequestUser | null | undefined),
   },
   upload: {
-    staticDir: "public/media",
+    staticDir: "media",
     imageSizes: [
       {
         name: "thumbnail",
