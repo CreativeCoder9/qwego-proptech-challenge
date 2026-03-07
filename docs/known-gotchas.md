@@ -37,3 +37,14 @@
 
 - `users.create` is currently open (`() => true`) while `role` field create/update is manager-only.
 - This supports self-registration defaults, but registration UX and server-side role guarantees should be verified when auth flow is implemented.
+
+## 7) Activity log writes must include denormalized access fields
+
+- `activity-logs` read access for tenant/technician relies on `tenant` and `assignedTo` fields on each log row.
+- Future hooks/services that create activity logs must set both fields, or non-manager users may not see relevant logs.
+
+## 8) Ticket status transitions are now strict
+
+- `tickets` enforces `open -> assigned -> in-progress -> done`.
+- Invalid jumps (for example `open -> done`) will fail with validation errors.
+- If product wants manager override transitions later, this must be changed explicitly in `src/collections/Tickets.ts`.

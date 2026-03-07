@@ -47,8 +47,9 @@ npm run build
 
 ## Upload Storage
 
-- Media uploads are configured to write under `public/media`.
+- Media uploads are configured to write under `media` (outside Next `public/`).
 - Generated image sizes: `thumbnail`, `medium`.
+- Do not move uploads back under `public/` unless you intentionally make files public.
 
 ## Useful Paths
 
@@ -59,3 +60,5 @@ npm run build
   - `payload.config.ts`
 - Collections:
   - `src/collections/*`
+- Shared access helpers:
+  - `src/lib/access.ts`
