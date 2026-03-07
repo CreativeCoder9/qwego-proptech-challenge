@@ -53,7 +53,8 @@ Scaffold the base application from scratch.
 
 ---
 
-### [ ] Step: Payload Collections & Access Control
+### [x] Step: Payload Collections & Access Control
+<!-- chat-id: b8701935-9d2c-4659-b54a-c4529a7a7a6e -->
 
 Define all Payload CMS collections with fields and access control rules.
 
