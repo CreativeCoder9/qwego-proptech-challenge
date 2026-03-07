@@ -82,7 +82,8 @@ Implement afterChange hooks and demo seed data.
 
 ---
 
-### [ ] Step: Auth Flow & Middleware
+### [x] Step: Auth Flow & Middleware
+<!-- chat-id: a7308009-0a97-429e-a291-a781141b3472 -->
 
 Implement authentication and route protection.
 
