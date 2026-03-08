@@ -4,6 +4,7 @@ This folder contains engineering notes for the PropTech MVP implementation.
 
 ## Contents
 
+- [Task Implementation Summary](./TASK-IMPLEMENTATION-SUMMARY.md)
 - [Engineering Handoff](./ENGINEERING-HANDOFF.md)
 - [Implementation Notes](./implementation-notes.md)
 - [Runbook](./runbook.md)
