@@ -3,10 +3,22 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
-import { useAuth } from "@/src/components/providers/AuthProvider";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+const getSafeNextPath = (raw: null | string) => {
+  if (!raw) {
+    return "/";
+  }
+
+  if (!raw.startsWith("/") || raw.startsWith("//")) {
+    return "/";
+  }
+
+  return raw;
+};
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -26,8 +38,8 @@ export default function LoginPage() {
     try {
       await login({ email, password });
 
-      const nextPath = searchParams?.get("next");
-      router.push(nextPath || "/dashboard");
+      const nextPath = getSafeNextPath(searchParams?.get("next") ?? null);
+      router.push(nextPath);
       router.refresh();
     } catch (submitError) {
       const message = submitError instanceof Error ? submitError.message : "Unable to login.";

@@ -68,20 +68,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshUser = useCallback(async () => {
-    const response = await fetch("/api/users/me", {
-      credentials: "include",
-      method: "GET",
-    });
+    try {
+      const response = await fetch("/api/users/me", {
+        credentials: "include",
+        method: "GET",
+      });
 
-    if (!response.ok) {
+      if (!response.ok) {
+        setUser(null);
+        return null;
+      }
+
+      const data = (await response.json()) as MeResponse;
+      const nextUser = data.user ?? null;
+      setUser(nextUser);
+      return nextUser;
+    } catch {
       setUser(null);
       return null;
     }
-
-    const data = (await response.json()) as MeResponse;
-    const nextUser = data.user ?? null;
-    setUser(nextUser);
-    return nextUser;
   }, []);
 
   useEffect(() => {

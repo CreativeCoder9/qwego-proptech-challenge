@@ -1,3 +1,5 @@
+import "server-only";
+
 import { cookies } from "next/headers";
 
 import { getPayloadClient } from "./payload";
@@ -32,4 +34,3 @@ export const getCurrentUser = async (): Promise<CurrentUser | null> => {
   const user = authResult.user as CurrentUser;
   return user;
 };
-

@@ -3,10 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
+import { useAuth } from "@/components/providers/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/src/components/providers/AuthProvider";
 
 export default function RegisterPage() {
   const { login, registerTenant } = useAuth();
@@ -35,7 +35,7 @@ export default function RegisterPage() {
       });
 
       await login({ email, password });
-      router.push("/dashboard");
+      router.push("/");
       router.refresh();
     } catch (submitError) {
       const message = submitError instanceof Error ? submitError.message : "Unable to register.";
@@ -111,4 +111,3 @@ export default function RegisterPage() {
     </main>
   );
 }
-

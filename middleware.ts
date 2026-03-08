@@ -2,18 +2,9 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 const AUTH_PAGES = new Set(["/login", "/register"]);
-const PUBLIC_PATH_PREFIXES = ["/api", "/admin", "/_next", "/media"];
-const PUBLIC_FILES = ["/favicon.ico"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  const isPublicPrefix = PUBLIC_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-  const isPublicFile = PUBLIC_FILES.includes(pathname);
-
-  if (isPublicPrefix || isPublicFile) {
-    return NextResponse.next();
-  }
 
   const token = request.cookies.get("payload-token")?.value;
   const isAuthenticated = Boolean(token);
@@ -26,13 +17,12 @@ export function middleware(request: NextRequest) {
   }
 
   if (isAuthenticated && isAuthPage) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!.*\\..*).*)"],
+  matcher: ["/((?!api|admin|_next/static|_next/image|media|favicon.ico|.*\\..*).*)"],
 };
-
