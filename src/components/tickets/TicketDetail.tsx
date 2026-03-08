@@ -1,4 +1,4 @@
-import Image from "next/image";
+
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PriorityBadge } from "@/src/components/tickets/PriorityBadge";
@@ -128,12 +128,11 @@ export const TicketDetail = ({ ticket }: { ticket: TicketDetailData }) => {
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {images.map((image, index) => (
                   <div className="overflow-hidden rounded-md border bg-muted" key={String(image.id ?? `${image.url}-${index}`)}>
-                    <Image
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
                       alt={image.alt}
                       className="h-48 w-full object-cover"
-                      height={384}
                       src={image.url}
-                      width={640}
                     />
                   </div>
                 ))}
