@@ -116,7 +116,8 @@ Build the app shell and role-based dashboard.
 
 ---
 
-### [ ] Step: Ticket List & Create Form
+### [x] Step: Ticket List & Create Form
+<!-- chat-id: 5c84e800-8155-4cdf-aaee-e030afc5231a -->
 
 Build the ticket submission and listing UI.
 
