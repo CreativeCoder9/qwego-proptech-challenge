@@ -12,11 +12,11 @@ import { getPayloadClient } from "@/src/lib/payload";
 
 type RelationUser =
   | {
-      email?: string;
-      id?: number | string;
-      name?: string;
-      role?: UserRole;
-    }
+    email?: string;
+    id?: number | string;
+    name?: string;
+    role?: UserRole;
+  }
   | number
   | string
   | null
@@ -24,10 +24,10 @@ type RelationUser =
 
 type RelationMedia =
   | {
-      filename?: string;
-      id?: number | string;
-      url?: string;
-    }
+    filename?: string;
+    id?: number | string;
+    url?: string;
+  }
   | number
   | string
   | null
@@ -104,20 +104,20 @@ export default async function TicketDetailPage({ params }: TicketDetailPageProps
     const technicians: TechnicianOption[] =
       currentUser.role === "manager"
         ? (((
-            await payload.find({
-              collection: "users",
-              depth: 0,
-              limit: 100,
-              overrideAccess: false,
-              sort: "name",
-              user: currentUser,
-              where: {
-                role: {
-                  equals: "technician",
-                },
+          await payload.find({
+            collection: "users",
+            depth: 0,
+            limit: 100,
+            overrideAccess: false,
+            sort: "name",
+            user: currentUser,
+            where: {
+              role: {
+                equals: "technician",
               },
-            })
-          ).docs as Array<{ email?: string; id: number | string; name?: string }>) ?? [])
+            },
+          })
+        ).docs as Array<{ email?: string; id: number | string; name?: string }>) ?? [])
         : [];
 
     return (
@@ -127,7 +127,7 @@ export default async function TicketDetailPage({ params }: TicketDetailPageProps
             <h1 className="text-2xl font-semibold tracking-tight">Ticket Details</h1>
             <p className="text-sm text-muted-foreground">Ticket #{String(ticket.id)}</p>
           </div>
-          <Button render={<Link href="/tickets" />} size="sm" variant="outline">
+          <Button render={<Link href="/tickets" />} size="sm" variant="outline" nativeButton={false}>
             Back to Tickets
           </Button>
         </section>

@@ -114,13 +114,14 @@ export const TicketForm = () => {
           throw new Error(await extractErrorMessage(uploadResponse));
         }
 
-        const uploadData = (await uploadResponse.json()) as { id?: number | string };
+        const uploadData = (await uploadResponse.json()) as { doc?: { id?: number | string } };
+        const mediaId = uploadData.doc?.id;
 
-        if (!uploadData.id) {
+        if (!mediaId) {
           throw new Error("Media upload succeeded but no media id was returned.");
         }
 
-        uploadedMediaIds.push(uploadData.id);
+        uploadedMediaIds.push(mediaId);
       }
 
       const response = await fetch("/api/tickets", {

@@ -31,7 +31,7 @@ export const TicketCard = ({ ticket }: { ticket: TicketListItem }) => {
         <p className="text-xs text-muted-foreground">
           {ticket.imageCount > 0 ? `${ticket.imageCount} image${ticket.imageCount === 1 ? "" : "s"}` : "No images"}
         </p>
-        <Button render={<Link href={`/tickets/${ticket.id}`} />} size="sm" variant="outline">
+        <Button render={<Link href={`/tickets/${ticket.id}`} />} size="sm" variant="outline" nativeButton={false}>
           View
         </Button>
       </CardFooter>

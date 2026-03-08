@@ -112,7 +112,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
           <p className="text-sm text-muted-foreground">{copy.description}</p>
         </div>
         {role === "tenant" ? (
-          <Button render={<Link href="/tickets/new" />}>
+          <Button render={<Link href="/tickets/new" />} nativeButton={false}>
             New Request
           </Button>
         ) : null}
@@ -131,7 +131,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
                 : "Tickets matching your role will appear here as soon as they are created or assigned."}
             </p>
             {role === "tenant" ? (
-              <Button render={<Link href="/tickets/new" />} size="sm">
+              <Button render={<Link href="/tickets/new" />} size="sm" nativeButton={false}>
                 Create Ticket
               </Button>
             ) : null}
@@ -151,12 +151,12 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
           </div>
           <div className="flex items-center justify-end gap-2">
             {result.hasPrevPage ? (
-              <Button render={<Link href={`/tickets?page=${currentPage - 1}`} />} size="sm" variant="outline">
+              <Button render={<Link href={`/tickets?page=${currentPage - 1}`} />} size="sm" variant="outline" nativeButton={false}>
                 Previous Page
               </Button>
             ) : null}
             {result.hasNextPage ? (
-              <Button render={<Link href={`/tickets?page=${currentPage + 1}`} />} size="sm" variant="outline">
+              <Button render={<Link href={`/tickets?page=${currentPage + 1}`} />} size="sm" variant="outline" nativeButton={false}>
                 Next Page
               </Button>
             ) : null}
