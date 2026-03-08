@@ -69,6 +69,7 @@ export const Users: CollectionConfig = {
     },
     {
       name: "unit",
+      label: "Apartment / Unit No.",
       type: "text",
     },
     {

@@ -86,7 +86,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="unit">Unit (optional)</Label>
+            <Label htmlFor="unit">Apartment / Unit No. (optional)</Label>
             <Input id="unit" onChange={(event) => setUnit(event.target.value)} value={unit} />
           </div>
 

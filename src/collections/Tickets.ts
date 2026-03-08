@@ -333,6 +333,7 @@ export const Tickets: CollectionConfig = {
     },
     {
       name: "unit",
+      label: "Apartment / Unit No.",
       type: "text",
       access: {
         update: ({ req }) => isManager(req.user as RequestUser | null | undefined),

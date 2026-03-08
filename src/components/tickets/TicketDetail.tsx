@@ -14,11 +14,11 @@ import {
 
 type RelationUser =
   | {
-      email?: string;
-      id?: number | string;
-      name?: string;
-      role?: UserRole;
-    }
+    email?: string;
+    id?: number | string;
+    name?: string;
+    role?: UserRole;
+  }
   | number
   | string
   | null
@@ -26,10 +26,10 @@ type RelationUser =
 
 type RelationMedia =
   | {
-      filename?: string;
-      id?: number | string;
-      url?: string;
-    }
+    filename?: string;
+    id?: number | string;
+    url?: string;
+  }
   | number
   | string
   | null
@@ -104,7 +104,7 @@ export const TicketDetail = ({ ticket }: { ticket: TicketDetailData }) => {
               <span className="text-muted-foreground">Technician:</span> {resolveUserLabel(ticket.assignedTo)}
             </p>
             <p>
-              <span className="text-muted-foreground">Unit:</span> {ticket.unit || "-"}
+              <span className="text-muted-foreground">Apt / Unit No.:</span> {ticket.unit || "-"}
             </p>
             <p>
               <span className="text-muted-foreground">Building:</span> {ticket.building || "-"}
