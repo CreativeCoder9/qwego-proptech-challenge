@@ -35,7 +35,7 @@ export default function RegisterPage() {
       });
 
       await login({ email, password });
-      router.push("/");
+      router.push("/dashboard");
       router.refresh();
     } catch (submitError) {
       const message = submitError instanceof Error ? submitError.message : "Unable to register.";

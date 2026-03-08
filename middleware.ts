@@ -17,7 +17,7 @@ export function middleware(request: NextRequest) {
   }
 
   if (isAuthenticated && isAuthPage) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();

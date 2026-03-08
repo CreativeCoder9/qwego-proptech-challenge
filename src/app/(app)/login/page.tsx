@@ -10,11 +10,11 @@ import { Label } from "@/components/ui/label";
 
 const getSafeNextPath = (raw: null | string) => {
   if (!raw) {
-    return "/";
+    return "/dashboard";
   }
 
   if (!raw.startsWith("/") || raw.startsWith("//")) {
-    return "/";
+    return "/dashboard";
   }
 
   return raw;

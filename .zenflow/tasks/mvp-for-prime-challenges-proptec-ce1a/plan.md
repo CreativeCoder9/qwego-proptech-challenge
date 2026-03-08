@@ -98,7 +98,8 @@ Implement authentication and route protection.
 
 ---
 
-### [ ] Step: Layout & Dashboard
+### [x] Step: Layout & Dashboard
+<!-- chat-id: 3750569c-76f2-4d9d-a203-1f01bbe479d0 -->
 
 Build the app shell and role-based dashboard.
 
