@@ -131,7 +131,8 @@ Build the ticket submission and listing UI.
 
 ---
 
-### [ ] Step: Ticket Detail, Manager Actions & Technician Updates
+### [x] Step: Ticket Detail, Manager Actions & Technician Updates
+<!-- chat-id: 85c72853-c74a-4f98-8db8-19060bcd2660 -->
 
 Build the ticket detail page with role-specific action panels.
 
