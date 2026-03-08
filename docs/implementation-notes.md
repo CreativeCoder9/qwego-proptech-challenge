@@ -20,7 +20,8 @@ Based on `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/plan.md`:
 - `Business Logic Hooks & Seed Script`: complete
 - `Auth Flow & Middleware`: complete
 - `Layout & Dashboard`: complete
-- Remaining steps: ticket list/create, ticket detail/actions, notifications page/final polish
+- `Ticket List & Create Form`: complete
+- Remaining steps: ticket detail/actions, notifications page/final polish
 
 ## Key Architecture Decisions
 
@@ -92,6 +93,57 @@ Based on `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/plan.md`:
   - `src/components/dashboard/RecentTickets.tsx`
 - Dashboard route is server-rendered at `src/app/(app)/dashboard/page.tsx`.
 
+## Ticket List and Create (Completed)
+
+### New routes
+
+- `src/app/(app)/tickets/page.tsx`
+  - Server-rendered ticket list with role-aware copy and query strategy.
+  - Uses Payload local API with `overrideAccess: false` and `user: currentUser`.
+  - Uses server pagination (`PAGE_SIZE = 25`, `?page=` query param).
+  - Uses role-aware query depth:
+    - manager: `depth: 1` (to resolve tenant/technician names)
+    - tenant/technician: `depth: 0` (lighter payload; avoids expecting restricted user relations)
+- `src/app/(app)/tickets/new/page.tsx`
+  - Tenant-only create page; non-tenant users are redirected to `/tickets`.
+- `src/app/(app)/tickets/[id]/page.tsx`
+  - Minimal detail page added to prevent 404s from list/card links.
+  - This is intentionally lightweight and will be expanded in the dedicated ticket-detail step.
+
+### New ticket UI components
+
+- `src/components/tickets/StatusBadge.tsx`
+- `src/components/tickets/PriorityBadge.tsx`
+- `src/components/tickets/TicketCard.tsx` (mobile list cards)
+- `src/components/tickets/TicketsDataTable.tsx` (desktop table)
+- `src/components/tickets/TicketForm.tsx` (tenant create form)
+- `src/components/tickets/types.ts` (shared ticket types/labels/date helpers)
+
+### Form and upload behavior
+
+- `TicketForm` uses:
+  - `react-hook-form`
+  - `@hookform/resolvers`
+  - `zod`
+- Create flow:
+  1. Upload selected images to `/api/media`
+  2. Submit ticket to `/api/tickets` with `images: [{ image: mediaId }]`
+- Failure handling:
+  - If ticket creation fails after media uploads succeed, client performs best-effort cleanup (`DELETE /api/media/:id`) to reduce orphaned media records.
+
+### Role-based table columns
+
+- Desktop table intentionally shows identity columns only for managers:
+  - manager: shows `Tenant` and `Technician`
+  - tenant/technician: hides those columns
+- This aligns UI with current `users` collection read access (non-managers can read only self).
+
+### Performance and correctness notes
+
+- Ticket list avoids hard `limit: 100`; it now paginates server-side.
+- Do not revert to broad `depth: 1` for all roles unless users access model is changed.
+- Detail links in list/card now resolve (minimal `[id]` page exists), avoiding dead-end navigation.
+
 ## Dashboard Data Access (Important)
 
 - Dashboard queries now run with Payload access control enabled:
@@ -140,5 +192,5 @@ Based on `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/plan.md`:
 
 The following are still pending and should be tracked against plan/spec docs:
 
-- Ticket workflows (create/assign/progress/done) and corresponding UI actions
+- Full ticket detail workflows (assign/update actions, activity log timeline)
 - Notifications page UX and final polish/testing/reporting

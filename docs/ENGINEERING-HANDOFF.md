@@ -4,7 +4,7 @@ This file is a practical handoff for the next engineer continuing implementation
 
 ## Project Snapshot
 - Stack: Next.js 15 App Router + Payload CMS v3 + SQLite + shadcn/ui.
-- Status: Plan steps complete through `Layout & Dashboard`; ticket list/detail and notifications UI flows are pending.
+- Status: Plan steps complete through `Ticket List & Create Form`; ticket detail/actions and notifications UI flows are pending.
 - Source of truth for scope and sequence:
   - `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/spec.md`
   - `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/plan.md`
@@ -63,6 +63,24 @@ This file is a practical handoff for the next engineer continuing implementation
 - Server dashboard route:
   - `src/app/(app)/dashboard/page.tsx`
 
+### Ticket list and create form (recently completed)
+- Routes:
+  - `src/app/(app)/tickets/page.tsx` (role-aware list + server pagination)
+  - `src/app/(app)/tickets/new/page.tsx` (tenant-only create)
+  - `src/app/(app)/tickets/[id]/page.tsx` (minimal detail route to support list navigation)
+- Components:
+  - `src/components/tickets/StatusBadge.tsx`
+  - `src/components/tickets/PriorityBadge.tsx`
+  - `src/components/tickets/TicketCard.tsx`
+  - `src/components/tickets/TicketsDataTable.tsx`
+  - `src/components/tickets/TicketForm.tsx`
+  - `src/components/tickets/types.ts`
+- Form stack:
+  - `react-hook-form` + `@hookform/resolvers` + `zod`
+- Upload behavior:
+  - Images are uploaded to `/api/media` first, then ticket is created via `/api/tickets`.
+  - On create failure after upload, best-effort cleanup deletes uploaded media records to reduce orphaned files.
+
 ## Important Auth/Middleware Notes
 - Middleware is intentionally coarse:
   - checks only presence of `payload-token` cookie
@@ -83,8 +101,10 @@ This file is a practical handoff for the next engineer continuing implementation
 - This preserves centralized collection access control. Do not switch dashboard reads to `overrideAccess: true` without a strong reason and explicit safety guardrails.
 
 ## Current Gaps (Next Work)
-- Ticket UI steps are pending:
-  - list, create form with upload, detail page, manager/technician actions
+- Ticket actions step is pending:
+  - manager assignment/status/priority actions
+  - technician progress update actions
+  - activity log timeline and richer detail UX
 - Notifications page and final polish/testing are pending.
 
 ## Runbook
@@ -106,6 +126,10 @@ This file is a practical handoff for the next engineer continuing implementation
 - Keep server-only boundaries:
   - do not import `src/lib/payload.ts` or `src/lib/auth.ts` from client components.
 - For activity log visibility, ensure log rows contain required denormalized fields expected by access filters.
+- Ticket list query intentionally uses role-aware depth:
+  - manager: `depth: 1` (needs relation names)
+  - tenant/technician: `depth: 0` (lighter payload and avoids expecting restricted user relation data)
+- Ticket table columns intentionally hide `Tenant`/`Technician` for non-managers to match current `users` read access model.
 
 ## Suggested Reading Order
 1. `payload.config.ts`

@@ -52,3 +52,15 @@
   - `overrideAccess: false`
   - `user: currentUser`
 - Avoid `overrideAccess: true` for user-facing dashboard queries, otherwise RBAC depends on ad-hoc filters and is easier to break.
+
+## 10) Ticket list route currently has a minimal `[id]` detail page
+
+- `src/app/(app)/tickets/[id]/page.tsx` exists primarily to prevent dead links from list/card navigation.
+- It is intentionally lightweight and does not yet include manager/technician action panels or activity timeline.
+- Next step should extend this route rather than replacing it.
+
+## 11) Ticket create flow performs media cleanup on failure
+
+- `TicketForm` uploads media first, then creates the ticket.
+- If ticket creation fails after uploads, it attempts best-effort cleanup with `DELETE /api/media/:id`.
+- This cleanup is client-side and non-transactional; there is still a small residual orphan risk on network/process interruption.
