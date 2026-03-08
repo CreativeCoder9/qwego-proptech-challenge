@@ -17,7 +17,10 @@ Based on `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/plan.md`:
 - `Technical Specification`: complete
 - `Project Bootstrap`: complete
 - `Payload Collections & Access Control`: complete
-- Remaining app/business-logic/UI steps are still pending
+- `Business Logic Hooks & Seed Script`: complete
+- `Auth Flow & Middleware`: complete
+- `Layout & Dashboard`: complete
+- Remaining steps: ticket list/create, ticket detail/actions, notifications page/final polish
 
 ## Key Architecture Decisions
 
@@ -78,8 +81,44 @@ Based on `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/plan.md`:
 
 - shadcn initialized via `components.json`.
 - App source is under `src/app`.
-- Dashboard block output is currently present in `src/pages/dashboard.tsx` (from shadcn block scaffold), with data in `src/pages/data.json`.
 - Shared UI components live under `components/ui`.
+- Implemented shell/dashboard components:
+  - `src/components/layout/AppShell.tsx`
+  - `src/components/layout/Sidebar.tsx`
+  - `src/components/layout/Header.tsx`
+  - `src/components/layout/utils.ts`
+  - `src/components/notifications/NotificationBell.tsx`
+  - `src/components/dashboard/StatsCards.tsx`
+  - `src/components/dashboard/RecentTickets.tsx`
+- Dashboard route is server-rendered at `src/app/(app)/dashboard/page.tsx`.
+
+## Dashboard Data Access (Important)
+
+- Dashboard queries now run with Payload access control enabled:
+  - `overrideAccess: false`
+  - `user: currentUser`
+- This is intentional and prevents accidental RBAC bypass in dashboard reads.
+- Future dashboard/reporting queries should follow the same pattern unless there is a clear admin-only need and an explicit security review.
+
+## Auth and Routing Notes (Important)
+
+- Root route (`/`) redirects to `/dashboard` in `src/app/page.tsx`.
+- Middleware now sets `next=/dashboard` when unauthenticated users hit `/` to avoid an extra redirect hop after login.
+- `AppShell` enforces consistent protected-route behavior:
+  - Auth pages (`/login`, `/register`) render without shell chrome.
+  - Non-auth pages with missing user session trigger a client redirect to login with `next` param.
+
+## Code Consistency Notes
+
+- Shared layout helpers were centralized:
+  - `getInitials`
+  - `isActivePath`
+- Avoid reintroducing duplicates in header/sidebar/shell components.
+
+## Encoding / Tooling Notes
+
+- New TS/TSX files were normalized to UTF-8 without BOM.
+- Keep files BOM-free to avoid formatter/linter churn across environments.
 
 ## Important File Map
 
@@ -101,8 +140,5 @@ Based on `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/plan.md`:
 
 The following are still pending and should be tracked against plan/spec docs:
 
-- Ticket lifecycle afterChange hooks for activity/notification automation
-- Seed script for demo users/tickets
-- Auth provider + middleware-protected app routes
-- Role-specific dashboard and ticket workflows (create/assign/progress/done)
+- Ticket workflows (create/assign/progress/done) and corresponding UI actions
 - Notifications page UX and final polish/testing/reporting

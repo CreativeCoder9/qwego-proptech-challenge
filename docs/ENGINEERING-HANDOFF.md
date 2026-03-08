@@ -4,7 +4,7 @@ This file is a practical handoff for the next engineer continuing implementation
 
 ## Project Snapshot
 - Stack: Next.js 15 App Router + Payload CMS v3 + SQLite + shadcn/ui.
-- Status: Plan steps complete through `Auth Flow & Middleware`; dashboard/ticket UI flows are still pending.
+- Status: Plan steps complete through `Layout & Dashboard`; ticket list/detail and notifications UI flows are pending.
 - Source of truth for scope and sequence:
   - `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/spec.md`
   - `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/plan.md`
@@ -49,6 +49,20 @@ This file is a practical handoff for the next engineer continuing implementation
 - Middleware:
   - `middleware.ts`
 
+### Layout and dashboard (recently completed)
+- App shell + role-aware navigation:
+  - `src/components/layout/AppShell.tsx`
+  - `src/components/layout/Sidebar.tsx`
+  - `src/components/layout/Header.tsx`
+  - `src/components/layout/utils.ts`
+- Dashboard widgets:
+  - `src/components/dashboard/StatsCards.tsx`
+  - `src/components/dashboard/RecentTickets.tsx`
+- Notifications bell (polling unread count every 30s):
+  - `src/components/notifications/NotificationBell.tsx`
+- Server dashboard route:
+  - `src/app/(app)/dashboard/page.tsx`
+
 ## Important Auth/Middleware Notes
 - Middleware is intentionally coarse:
   - checks only presence of `payload-token` cookie
@@ -56,18 +70,19 @@ This file is a practical handoff for the next engineer continuing implementation
   - redirects authenticated users away from `/login` and `/register`
 - Middleware now excludes non-app routes at matcher level:
   - `/api`, `/admin`, `/_next/*`, `/media`, `favicon.ico`, and static files
-- Redirect target is currently `/` (not `/dashboard`) to avoid 404 until dashboard page exists.
+- Redirect target for authenticated users on auth pages is `/dashboard`.
 - Login `next` param is sanitized to prevent open redirects:
   - only internal paths are allowed
   - external/protocol-relative values fall back to `/`
+- Middleware special-case: unauthenticated requests to `/` get `next=/dashboard` to avoid an extra post-login redirect hop.
 
-## Known Mismatch to Be Aware Of
-- Plan verification text for auth still says redirect to `/dashboard`, but implementation redirects to `/` because `/dashboard` route is not yet built.
-- When `Layout & Dashboard` step is implemented and `/dashboard` exists, redirects can be switched back if desired.
+## Important Dashboard/RBAC Notes
+- Dashboard reads from `tickets` intentionally use Payload local API with:
+  - `overrideAccess: false`
+  - `user: currentUser`
+- This preserves centralized collection access control. Do not switch dashboard reads to `overrideAccess: true` without a strong reason and explicit safety guardrails.
 
 ## Current Gaps (Next Work)
-- `Layout & Dashboard` step is pending:
-  - app shell, role-aware nav, header, notification bell, dashboard page/cards/table
 - Ticket UI steps are pending:
   - list, create form with upload, detail page, manager/technician actions
 - Notifications page and final polish/testing are pending.
@@ -87,8 +102,7 @@ This file is a practical handoff for the next engineer continuing implementation
 - `SEED_PASSWORD` (required for seed script)
 
 ## Practical Gotchas
-- `src/pages/dashboard.tsx` exists from shadcn `dashboard-01` scaffold (pages router artifact).
-  - Planned app implementation should live in `src/app/(app)/dashboard/page.tsx`.
+- Remove or avoid introducing App Router/Pages Router route conflicts for the same path (e.g., both `app/(app)/dashboard/page.tsx` and `pages/dashboard.tsx`).
 - Keep server-only boundaries:
   - do not import `src/lib/payload.ts` or `src/lib/auth.ts` from client components.
 - For activity log visibility, ensure log rows contain required denormalized fields expected by access filters.
@@ -100,4 +114,3 @@ This file is a practical handoff for the next engineer continuing implementation
 4. `src/components/providers/AuthProvider.tsx`
 5. `middleware.ts`
 6. `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/plan.md`
-

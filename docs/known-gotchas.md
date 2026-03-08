@@ -12,13 +12,10 @@
 - `@shadcn/sonner` is used instead.
 - Compatibility shim exists in `components/ui/toast.tsx` (`export { toast } from "sonner"`).
 
-## 3) Dashboard block scaffold location
+## 3) Route conflicts between App Router and Pages Router
 
-- `dashboard-01` scaffold produced a pages-router file (`src/pages/dashboard.tsx`) and required `src/pages/data.json`.
-- This coexists with App Router (`src/app`).
-- Before building final app routes, decide whether to:
-  - migrate dashboard components fully into `src/app`, or
-  - keep pages route intentionally for the demo dashboard.
+- Next.js build fails if the same route exists in both routers (for example `app/(app)/dashboard/page.tsx` and `pages/dashboard.tsx`).
+- Keep dashboard in App Router only (`src/app/(app)/dashboard/page.tsx`) for this project.
 
 ## 4) ESLint config and Next plugin warning
 
@@ -48,3 +45,10 @@
 - `tickets` enforces `open -> assigned -> in-progress -> done`.
 - Invalid jumps (for example `open -> done`) will fail with validation errors.
 - If product wants manager override transitions later, this must be changed explicitly in `src/collections/Tickets.ts`.
+
+## 9) Dashboard reads must respect collection access rules
+
+- For ticket reads on dashboard, use Payload local API with:
+  - `overrideAccess: false`
+  - `user: currentUser`
+- Avoid `overrideAccess: true` for user-facing dashboard queries, otherwise RBAC depends on ad-hoc filters and is easier to break.
