@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Inbox } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -63,8 +64,12 @@ export const RecentTickets = ({ tickets }: { tickets: RecentTicket[] }) => {
       </div>
 
       {tickets.length === 0 ? (
-        <div className="rounded-md border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
-          No tickets found for your role yet.
+        <div className="rounded-md border border-dashed bg-muted/20 px-4 py-10 text-center">
+          <div className="mx-auto flex max-w-xs flex-col items-center gap-2">
+            <Inbox className="size-6 text-muted-foreground" />
+            <p className="text-sm font-medium">No recent tickets</p>
+            <p className="text-sm text-muted-foreground">Tickets will appear here as work requests are created.</p>
+          </div>
         </div>
       ) : (
         <Table>

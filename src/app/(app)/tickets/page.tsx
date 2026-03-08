@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ClipboardList } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { TicketCard } from "@/src/components/tickets/TicketCard";
@@ -118,8 +119,23 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
       </section>
 
       {tickets.length === 0 ? (
-        <div className="rounded-lg border border-dashed px-6 py-12 text-center text-sm text-muted-foreground">
-          No tickets found for your role yet.
+        <div className="rounded-lg border border-dashed bg-muted/20 px-6 py-14 text-center">
+          <div className="mx-auto flex max-w-sm flex-col items-center gap-3">
+            <div className="rounded-full border bg-background p-3">
+              <ClipboardList className="size-6 text-muted-foreground" />
+            </div>
+            <p className="text-sm font-medium">No tickets yet</p>
+            <p className="text-sm text-muted-foreground">
+              {role === "tenant"
+                ? "Create your first maintenance request to get help from the property team."
+                : "Tickets matching your role will appear here as soon as they are created or assigned."}
+            </p>
+            {role === "tenant" ? (
+              <Button render={<Link href="/tickets/new" />} size="sm">
+                Create Ticket
+              </Button>
+            ) : null}
+          </div>
         </div>
       ) : (
         <>
