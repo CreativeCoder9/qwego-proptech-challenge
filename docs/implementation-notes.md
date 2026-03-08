@@ -21,7 +21,8 @@ Based on `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/plan.md`:
 - `Auth Flow & Middleware`: complete
 - `Layout & Dashboard`: complete
 - `Ticket List & Create Form`: complete
-- Remaining steps: ticket detail/actions, notifications page/final polish
+- `Ticket Details & Actions`: complete
+- `Notifications & Polish`: complete
 
 ## Key Architecture Decisions
 
@@ -190,7 +191,4 @@ Based on `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/plan.md`:
 
 ## Planned but Not Yet Implemented
 
-The following are still pending and should be tracked against plan/spec docs:
-
-- Full ticket detail workflows (assign/update actions, activity log timeline)
-- Notifications page UX and final polish/testing/reporting
+The core MVP scope from `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/plan.md` is complete.

@@ -4,7 +4,7 @@ This file is a practical handoff for the next engineer continuing implementation
 
 ## Project Snapshot
 - Stack: Next.js 15 App Router + Payload CMS v3 + SQLite + shadcn/ui.
-- Status: Plan steps complete through `Ticket List & Create Form`; ticket detail/actions and notifications UI flows are pending.
+- Status: MVP implementation complete, including ticket list, creation form, details/actions, and notifications.
 - Source of truth for scope and sequence:
   - `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/spec.md`
   - `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/plan.md`
@@ -101,11 +101,7 @@ This file is a practical handoff for the next engineer continuing implementation
 - This preserves centralized collection access control. Do not switch dashboard reads to `overrideAccess: true` without a strong reason and explicit safety guardrails.
 
 ## Current Gaps (Next Work)
-- Ticket actions step is pending:
-  - manager assignment/status/priority actions
-  - technician progress update actions
-  - activity log timeline and richer detail UX
-- Notifications page and final polish/testing are pending.
+- The core MVP implementation is complete. Future enhancements could include reporting features, performance optimizations, and integrations.
 
 ## Runbook
 - Install: `npm install`
