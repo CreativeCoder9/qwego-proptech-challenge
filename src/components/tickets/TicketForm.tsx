@@ -59,33 +59,15 @@ const extractErrorMessage = async (response: Response): Promise<string> => {
   return "Request failed. Please try again.";
 };
 
-const uploadMedia = async (files: File[]) => {
-  const uploadIds: Array<number | string> = [];
-
-  for (const file of files) {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const response = await fetch("/api/media", {
-      body: formData,
-      credentials: "include",
-      method: "POST",
-    });
-
-    if (!response.ok) {
-      throw new Error(await extractErrorMessage(response));
-    }
-
-    const data = (await response.json()) as { id?: number | string };
-
-    if (!data.id) {
-      throw new Error("Media upload succeeded but no media id was returned.");
-    }
-
-    uploadIds.push(data.id);
-  }
-
-  return uploadIds;
+const cleanupUploadedMedia = async (mediaIds: Array<number | string>) => {
+  await Promise.allSettled(
+    mediaIds.map(async (id) => {
+      await fetch(`/api/media/${id}`, {
+        credentials: "include",
+        method: "DELETE",
+      });
+    }),
+  );
 };
 
 export const TicketForm = () => {
@@ -115,15 +97,37 @@ export const TicketForm = () => {
 
   const onSubmit = async (values: TicketFormValues) => {
     setSubmitError(null);
+    const uploadedMediaIds: Array<number | string> = [];
 
     try {
-      const mediaIds = values.images.length > 0 ? await uploadMedia(values.images) : [];
+      for (const file of values.images) {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const uploadResponse = await fetch("/api/media", {
+          body: formData,
+          credentials: "include",
+          method: "POST",
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error(await extractErrorMessage(uploadResponse));
+        }
+
+        const uploadData = (await uploadResponse.json()) as { id?: number | string };
+
+        if (!uploadData.id) {
+          throw new Error("Media upload succeeded but no media id was returned.");
+        }
+
+        uploadedMediaIds.push(uploadData.id);
+      }
 
       const response = await fetch("/api/tickets", {
         body: JSON.stringify({
           category: values.category,
           description: values.description,
-          images: mediaIds.map((id) => ({ image: id })),
+          images: uploadedMediaIds.map((id) => ({ image: id })),
           priority: values.priority,
           title: values.title,
         }),
@@ -142,6 +146,9 @@ export const TicketForm = () => {
       router.push("/tickets");
       router.refresh();
     } catch (error) {
+      if (uploadedMediaIds.length > 0) {
+        await cleanupUploadedMedia(uploadedMediaIds);
+      }
       const message = error instanceof Error ? error.message : "Unable to create ticket.";
       setSubmitError(message);
     }

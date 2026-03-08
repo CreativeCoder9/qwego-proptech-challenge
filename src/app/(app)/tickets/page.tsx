@@ -67,27 +67,41 @@ const getPageCopy = (role: UserRole) => {
   };
 };
 
-export default async function TicketsPage() {
+const PAGE_SIZE = 25;
+
+type TicketsPageProps = {
+  searchParams?: Promise<{
+    page?: string;
+  }>;
+};
+
+export default async function TicketsPage({ searchParams }: TicketsPageProps) {
   const currentUser = await getCurrentUser();
 
   if (!currentUser?.id || !currentUser.role) {
     redirect("/login");
   }
 
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const requestedPage = Number(resolvedSearchParams.page ?? "1");
+  const page = Number.isFinite(requestedPage) && requestedPage > 0 ? Math.floor(requestedPage) : 1;
+
   const role = currentUser.role;
   const payload = await getPayloadClient();
 
   const result = await payload.find({
     collection: "tickets",
-    depth: 1,
-    limit: 100,
+    depth: role === "manager" ? 1 : 0,
+    limit: PAGE_SIZE,
     overrideAccess: false,
+    page,
     sort: "-updatedAt",
     user: currentUser,
   });
 
   const tickets = (result.docs as TicketDoc[]).map(toListItem);
   const copy = getPageCopy(role);
+  const currentPage = result.page ?? page;
 
   return (
     <div className="space-y-6">
@@ -118,6 +132,18 @@ export default async function TicketsPage() {
           </div>
           <div className="hidden md:block">
             <TicketsDataTable role={role} tickets={tickets} />
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            {result.hasPrevPage ? (
+              <Button render={<Link href={`/tickets?page=${currentPage - 1}`} />} size="sm" variant="outline">
+                Previous Page
+              </Button>
+            ) : null}
+            {result.hasNextPage ? (
+              <Button render={<Link href={`/tickets?page=${currentPage + 1}`} />} size="sm" variant="outline">
+                Next Page
+              </Button>
+            ) : null}
           </div>
         </>
       )}
