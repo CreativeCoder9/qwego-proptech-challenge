@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
@@ -91,9 +92,9 @@ export default function LoginPage() {
 
         <p className="text-sm text-muted-foreground">
           New tenant?{" "}
-          <a className="font-medium text-foreground underline underline-offset-4" href="/register">
+          <Link className="font-medium text-foreground underline underline-offset-4" href="/register">
             Create an account
-          </a>
+          </Link>
         </p>
       </div>
     </main>

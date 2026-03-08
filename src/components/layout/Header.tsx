@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useRouter } from "next/navigation";
 
@@ -10,16 +10,7 @@ import { useAuth } from "@/components/providers/AuthProvider";
 
 import { NotificationBell } from "@/src/components/notifications/NotificationBell";
 import type { AppUser } from "@/src/components/layout/Sidebar";
-
-const getInitials = (name?: string, email?: string) => {
-  const source = name?.trim() || email?.trim() || "U";
-
-  return source
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
-};
+import { getInitials } from "@/src/components/layout/utils";
 
 export const Header = ({ user: initialUser }: { user: AppUser }) => {
   const router = useRouter();

@@ -1,13 +1,14 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import type { CSSProperties, ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, type CSSProperties, type ReactNode } from "react";
 
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 import { Header } from "@/src/components/layout/Header";
 import { AppSidebar, getNavigationForRole, type AppUser } from "@/src/components/layout/Sidebar";
+import { isActivePath } from "@/src/components/layout/utils";
 
 type AppShellProps = {
   children: ReactNode;
@@ -16,23 +17,23 @@ type AppShellProps = {
 
 const AUTH_ROUTES = new Set(["/login", "/register"]);
 
-const isActive = (pathname: string, href: string) => {
-  if (href === "/") {
-    return pathname === href;
-  }
-
-  return pathname === href || pathname.startsWith(`${href}/`);
-};
-
 export const AppShell = ({ children, user }: AppShellProps) => {
+  const router = useRouter();
   const pathname = usePathname() ?? "/";
+  const isAuthRoute = AUTH_ROUTES.has(pathname);
 
-  if (AUTH_ROUTES.has(pathname)) {
+  useEffect(() => {
+    if (!isAuthRoute && !user) {
+      router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+    }
+  }, [isAuthRoute, pathname, router, user]);
+
+  if (isAuthRoute) {
     return <>{children}</>;
   }
 
   if (!user) {
-    return <>{children}</>;
+    return null;
   }
 
   const navItems = getNavigationForRole(user.role);
@@ -60,7 +61,7 @@ export const AppShell = ({ children, user }: AppShellProps) => {
               <Link
                 className={[
                   "flex min-h-14 flex-col items-center justify-center rounded-md text-[11px] font-medium",
-                  isActive(pathname, item.href) ? "bg-accent text-accent-foreground" : "text-muted-foreground",
+                  isActivePath(pathname, item.href) ? "bg-accent text-accent-foreground" : "text-muted-foreground",
                 ].join(" ")}
                 href={item.href}
               >

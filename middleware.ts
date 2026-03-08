@@ -12,7 +12,7 @@ export function middleware(request: NextRequest) {
 
   if (!isAuthenticated && !isAuthPage) {
     const loginURL = new URL("/login", request.url);
-    loginURL.searchParams.set("next", pathname);
+    loginURL.searchParams.set("next", pathname === "/" ? "/dashboard" : pathname);
     return NextResponse.redirect(loginURL);
   }
 

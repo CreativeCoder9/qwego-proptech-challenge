@@ -1,14 +1,10 @@
-﻿import { redirect } from "next/navigation";
-import type { Where } from "payload";
-
+import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/src/lib/auth";
 import { getPayloadClient } from "@/src/lib/payload";
 import { RecentTickets, type RecentTicket } from "@/src/components/dashboard/RecentTickets";
 import { StatsCards, type StatsCounts } from "@/src/components/dashboard/StatsCards";
 
 type TicketStatus = "open" | "assigned" | "in-progress" | "done";
-type UserRole = "tenant" | "manager" | "technician";
-
 type TicketDoc = {
   id: number | string;
   status: TicketStatus;
@@ -24,39 +20,11 @@ const statusToStatKey: Record<TicketStatus, keyof StatsCounts> = {
   open: "open",
 };
 
-const getRoleWhere = (role: UserRole, userId: number | string): Where | undefined => {
-  if (role === "manager") {
-    return undefined;
-  }
-
-  if (role === "tenant") {
-    return {
-      tenant: {
-        equals: userId,
-      },
-    };
-  }
-
+const buildStatusWhere = (status: TicketStatus) => {
   return {
-    assignedTo: {
-      equals: userId,
-    },
-  };
-};
-
-const buildStatusWhere = (baseWhere: Where | undefined, status: TicketStatus): Where => {
-  const statusWhere: Where = {
     status: {
       equals: status,
     },
-  };
-
-  if (!baseWhere) {
-    return statusWhere;
-  }
-
-  return {
-    and: [baseWhere, statusWhere],
   };
 };
 
@@ -82,9 +50,7 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const role = (currentUser.role ?? "tenant") as UserRole;
   const payload = await getPayloadClient();
-  const roleWhere = getRoleWhere(role, currentUser.id);
 
   const statuses: TicketStatus[] = ["open", "assigned", "in-progress", "done"];
 
@@ -95,8 +61,9 @@ export default async function DashboardPage() {
           collection: "tickets",
           depth: 0,
           limit: 1,
-          overrideAccess: true,
-          where: buildStatusWhere(roleWhere, status),
+          overrideAccess: false,
+          user: currentUser,
+          where: buildStatusWhere(status),
         }),
       ),
     ),
@@ -104,9 +71,9 @@ export default async function DashboardPage() {
       collection: "tickets",
       depth: 1,
       limit: 5,
-      overrideAccess: true,
+      overrideAccess: false,
       sort: "-updatedAt",
-      where: roleWhere,
+      user: currentUser,
     }),
   ]);
 

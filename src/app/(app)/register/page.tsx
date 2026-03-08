@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
@@ -103,9 +104,9 @@ export default function RegisterPage() {
 
         <p className="text-sm text-muted-foreground">
           Already have an account?{" "}
-          <a className="font-medium text-foreground underline underline-offset-4" href="/login">
+          <Link className="font-medium text-foreground underline underline-offset-4" href="/login">
             Sign in
-          </a>
+          </Link>
         </p>
       </div>
     </main>

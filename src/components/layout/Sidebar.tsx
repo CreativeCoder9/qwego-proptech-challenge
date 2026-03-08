@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -24,6 +24,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { getInitials, isActivePath } from "@/src/components/layout/utils";
 
 type UserRole = "tenant" | "manager" | "technician";
 
@@ -63,24 +64,6 @@ const NAV_BY_ROLE: Record<UserRole, NavigationItem[]> = {
 
 export const getNavigationForRole = (role?: UserRole) => NAV_BY_ROLE[role ?? FALLBACK_ROLE];
 
-const getInitials = (name?: string, email?: string) => {
-  const source = name?.trim() || email?.trim() || "U";
-
-  return source
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
-};
-
-const isActive = (pathname: string, href: string) => {
-  if (href === "/") {
-    return pathname === href;
-  }
-
-  return pathname === href || pathname.startsWith(`${href}/`);
-};
-
 export const AppSidebar = ({ user }: { user: AppUser }) => {
   const pathname = usePathname() ?? "/";
   const navItems = getNavigationForRole(user.role);
@@ -105,7 +88,7 @@ export const AppSidebar = ({ user }: { user: AppUser }) => {
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
-                    isActive={isActive(pathname, item.href)}
+                    isActive={isActivePath(pathname, item.href)}
                     render={<Link href={item.href} />}
                     tooltip={item.label}
                   >
