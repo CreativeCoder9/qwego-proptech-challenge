@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Bell, CheckCheck, CircleDot } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -97,6 +98,7 @@ export const NotificationsList = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
   const [activeNotificationId, setActiveNotificationId] = useState<number | string | null>(null);
+  const [isMarkingAll, setIsMarkingAll] = useState(false);
 
   const {
     data: notifications = [],
@@ -127,7 +129,22 @@ export const NotificationsList = () => {
       return;
     }
 
-    await Promise.all(unreadIds.map((id) => markReadMutation.mutateAsync(id)));
+    setIsMarkingAll(true);
+
+    try {
+      const results = await Promise.allSettled(unreadIds.map((id) => markNotificationAsRead(id)));
+      const failedCount = results.filter((result) => result.status === "rejected").length;
+
+      if (failedCount > 0) {
+        toast.error(
+          `Marked ${unreadIds.length - failedCount} of ${unreadIds.length} notifications as read. Please retry.`,
+        );
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    } finally {
+      setIsMarkingAll(false);
+    }
   };
 
   const onOpenTicket = async (notification: NotificationDoc) => {
@@ -141,14 +158,17 @@ export const NotificationsList = () => {
 
     try {
       if (!notification.read) {
-        await markReadMutation.mutateAsync(notification.id);
+        try {
+          await markReadMutation.mutateAsync(notification.id);
+        } catch {
+          toast.error("Couldn't mark notification as read.");
+        }
       }
-
-      router.push(`/tickets/${ticketId}`);
-      router.refresh();
     } finally {
       setActiveNotificationId(null);
     }
+
+    router.push(`/tickets/${ticketId}`);
   };
 
   if (isLoading) {
@@ -181,7 +201,7 @@ export const NotificationsList = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-end">
         <Button
-          disabled={unreadNotifications.length === 0 || markReadMutation.isPending}
+          disabled={unreadNotifications.length === 0 || isMarkingAll}
           onClick={() => void onMarkAllRead()}
           type="button"
           variant="outline"
