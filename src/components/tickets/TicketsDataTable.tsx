@@ -65,7 +65,7 @@ export const TicketsDataTable = ({ role, tickets }: TicketsDataTableProps) => {
         header: "Category",
         cell: ({ row }) => CATEGORY_LABELS[row.original.category],
       },
-      ...(role === "manager"
+      ...(role === "manager" || role === "admin"
         ? [
             {
               accessorKey: "tenantName",
@@ -74,7 +74,7 @@ export const TicketsDataTable = ({ role, tickets }: TicketsDataTableProps) => {
             } satisfies ColumnDef<TicketListItem>,
           ]
         : []),
-      ...(role === "manager"
+      ...(role === "manager" || role === "admin"
         ? [
             {
               accessorKey: "assignedToName",

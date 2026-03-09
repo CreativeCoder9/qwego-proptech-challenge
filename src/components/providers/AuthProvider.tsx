@@ -14,7 +14,7 @@ type AuthUser = {
   id: number | string;
   email?: string;
   name?: string;
-  role?: "tenant" | "manager" | "technician";
+  role?: "tenant" | "manager" | "technician" | "admin";
 };
 
 type LoginInput = {

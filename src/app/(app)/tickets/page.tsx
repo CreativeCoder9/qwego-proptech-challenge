@@ -48,7 +48,7 @@ const toListItem = (ticket: TicketDoc): TicketListItem => {
 };
 
 const getPageCopy = (role: UserRole) => {
-  if (role === "manager") {
+  if (role === "manager" || role === "admin") {
     return {
       description: "Review all maintenance requests and keep assignments moving.",
       title: "All Tickets",
@@ -92,7 +92,7 @@ export default async function TicketsPage({ searchParams }: TicketsPageProps) {
 
   const result = await payload.find({
     collection: "tickets",
-    depth: role === "manager" ? 1 : 0,
+    depth: role === "manager" || role === "admin" ? 1 : 0,
     limit: PAGE_SIZE,
     overrideAccess: false,
     page,

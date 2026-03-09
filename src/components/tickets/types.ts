@@ -1,7 +1,7 @@
 export type TicketStatus = "open" | "assigned" | "in-progress" | "done";
 export type TicketPriority = "low" | "medium" | "high" | "critical";
 export type TicketCategory = "plumbing" | "electrical" | "hvac" | "structural" | "other";
-export type UserRole = "tenant" | "manager" | "technician";
+export type UserRole = "tenant" | "manager" | "technician" | "admin";
 
 export type TicketListItem = {
   id: number | string;

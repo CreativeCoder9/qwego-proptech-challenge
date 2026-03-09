@@ -27,6 +27,7 @@ Collection registration is in `payload.config.ts`.
 - `tenant`
 - `manager`
 - `technician`
+- `admin`
 
 All role predicates are centralized in `src/lib/access.ts`.
 
@@ -36,25 +37,27 @@ All role predicates are centralized in `src/lib/access.ts`.
 
 - `create`: open (`true`) for self-registration
 - `read`:
-  - manager: all users
+  - admin/manager: all users
   - others: only self (`id == req.user.id`)
 - `update`:
-  - manager: all users
+  - admin/manager: all users
   - others: only self
-- `delete`: manager only
-- Field-level: `role` is create/update manager-only
+- `delete`: admin only
+- `admin` access (Payload CMS admin UI): admin only (`access.admin`)
+- Field-level: `role` is create/update admin-only
+- First-user bootstrap: when users collection is empty, first created user is forced to `admin`
 
-Effectively, non-managers cannot self-promote by setting `role`.
+Effectively, non-admins cannot self-promote by setting `role`.
 
 ### tickets (`src/collections/Tickets.ts`)
 
 - `create`: tenant only
 - `read`:
-  - manager: all tickets
+  - admin/manager: all tickets
   - tenant: own tickets (`tenant == req.user.id`)
   - technician: assigned tickets (`assignedTo == req.user.id`)
 - `update`:
-  - manager: all tickets
+  - admin/manager: all tickets
   - technician: assigned tickets
   - tenant: none
 - `delete`: disabled
@@ -63,7 +66,7 @@ Effectively, non-managers cannot self-promote by setting `role`.
 
 - `create/update/delete`: disabled from clients
 - `read`:
-  - manager: all logs
+  - admin/manager: all logs
   - tenant: logs where `tenant == req.user.id`
   - technician: logs where `assignedTo == req.user.id`
 
@@ -78,7 +81,7 @@ Note: visibility for tenant/technician depends on denormalized `tenant` and `ass
 ### media (`src/collections/Media.ts`)
 
 - `create/read`: authenticated users
-- `update/delete`: manager only
+- `update/delete`: admin/manager only
 - Upload constraints:
   - mime types: `image/jpeg`, `image/png`, `image/webp`
   - static dir: `media`
@@ -144,7 +147,7 @@ Ticket side effects are centralized in:
 ### On Ticket Create
 
 - Activity log row with action `created`
-- Notification of type `ticket-created` to all managers
+- Notification of type `ticket-created` to admins and managers
 
 ### On Assignment Change
 
@@ -168,7 +171,7 @@ Ticket side effects are centralized in:
   - creates ticket second
   - best-effort media cleanup on ticket create failure
 - Ticket actions (`src/components/tickets/TicketActionsPanel.tsx` and `AssignTechnicianDialog.tsx`):
-  - manager: assign technician, update status, update priority
+  - admin/manager: assign technician, update status, update priority
   - technician: progress status on own assigned tickets
 - Notifications UI (`src/components/notifications/NotificationsList.tsx`):
   - reads user notifications

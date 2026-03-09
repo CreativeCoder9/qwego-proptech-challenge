@@ -193,7 +193,7 @@ export const TicketActionsPanel = ({
     router.refresh();
   };
 
-  if (role === "manager") {
+  if (role === "manager" || role === "admin") {
     return (
       <Card>
         <CardHeader>

@@ -8,7 +8,7 @@ export type CurrentUser = {
   id: number | string;
   email?: string;
   name?: string;
-  role?: "tenant" | "manager" | "technician";
+  role?: "tenant" | "manager" | "technician" | "admin";
 };
 
 export const getCurrentUser = async (): Promise<CurrentUser | null> => {

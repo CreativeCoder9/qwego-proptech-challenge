@@ -45,10 +45,10 @@ const getUserContactById = async ({
   };
 };
 
-const findAllManagers = async (
+const findManagementUsers = async (
   req: Parameters<CollectionAfterChangeHook>[0]["req"],
 ): Promise<Array<{ email?: string; id: number | string; name?: string }>> => {
-  const managers: Array<{ email?: string; id: number | string; name?: string }> = [];
+  const recipients: Array<{ email?: string; id: number | string; name?: string }> = [];
   let page = 1;
   const limit = 100;
 
@@ -62,12 +62,12 @@ const findAllManagers = async (
       req,
       where: {
         role: {
-          equals: "manager",
+          in: ["manager", "admin"],
         },
       },
     });
 
-    managers.push(
+    recipients.push(
       ...response.docs.map((doc) => ({
         email: (doc as { email?: string }).email,
         id: doc.id,
@@ -82,7 +82,7 @@ const findAllManagers = async (
     page += 1;
   }
 
-  return managers;
+  return recipients;
 };
 
 const sendNotificationEmail = async ({
@@ -199,7 +199,7 @@ export const afterChangeTicket: CollectionAfterChangeHook = async ({
       ticket: currentTicket,
     });
 
-    const managers = await findAllManagers(req);
+    const managers = await findManagementUsers(req);
 
     await Promise.all(
       managers.map(async (manager) =>

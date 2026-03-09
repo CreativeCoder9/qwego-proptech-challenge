@@ -102,7 +102,7 @@ export default async function TicketDetailPage({ params }: TicketDetailPageProps
     });
 
     const technicians: TechnicianOption[] =
-      currentUser.role === "manager"
+      currentUser.role === "manager" || currentUser.role === "admin"
         ? (((
           await payload.find({
             collection: "users",

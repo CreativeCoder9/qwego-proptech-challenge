@@ -26,7 +26,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, isActivePath } from "@/src/components/layout/utils";
 
-type UserRole = "tenant" | "manager" | "technician";
+type UserRole = "tenant" | "manager" | "technician" | "admin";
 
 type AppUser = {
   id: number | string;
@@ -44,6 +44,12 @@ type NavigationItem = {
 const FALLBACK_ROLE: UserRole = "tenant";
 
 const NAV_BY_ROLE: Record<UserRole, NavigationItem[]> = {
+  admin: [
+    { href: "/dashboard", icon: House, label: "Dashboard" },
+    { href: "/tickets", icon: Ticket, label: "All Tickets" },
+    { href: "/notifications", icon: Bell, label: "Notifications" },
+    { href: "/admin", icon: House, label: "Payload Admin" },
+  ],
   manager: [
     { href: "/dashboard", icon: House, label: "Dashboard" },
     { href: "/tickets", icon: Ticket, label: "All Tickets" },

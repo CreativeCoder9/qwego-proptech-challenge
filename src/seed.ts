@@ -1,6 +1,6 @@
 import { createRequire } from "node:module";
 
-type UserRole = "manager" | "technician" | "tenant";
+type UserRole = "admin" | "manager" | "technician" | "tenant";
 type TicketStatus = "open" | "assigned" | "in-progress" | "done";
 type TicketPriority = "low" | "medium" | "high" | "critical";
 type TicketCategory = "plumbing" | "electrical" | "hvac" | "structural" | "other";
@@ -155,12 +155,12 @@ const run = async () => {
   const payload = await getPayload({ config });
   console.log("Seed: Payload initialized.");
 
-  const manager = await upsertUser(payload, {
-    email: "manager@propertymanager.local",
-    name: "Maya Manager",
+  const admin = await upsertUser(payload, {
+    email: "admin@propertymanager.local",
+    name: "Avery Admin",
     password: seedPassword,
     phone: "+1 555-0100",
-    role: "manager",
+    role: "admin",
   });
 
   const technicianA = await upsertUser(payload, {
@@ -259,7 +259,7 @@ const run = async () => {
 
   console.log("Seed complete.");
   console.log(`Seed password source: SEED_PASSWORD (${seedPassword.length} chars)`);
-  console.log(`Manager: ${manager.email}`);
+  console.log(`Admin: ${admin.email}`);
   console.log(`Technicians: ${technicianA.email}, ${technicianB.email}`);
   console.log(`Tenants: ${tenantA.email}, ${tenantB.email}`);
 

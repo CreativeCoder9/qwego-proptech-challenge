@@ -51,7 +51,7 @@ $env:SEED_PASSWORD="ChangeMe-Seed-2026"; npm run seed
 
 What seed currently creates:
 
-- 1 manager
+- 1 admin
 - 2 technicians
 - 2 tenants
 - 5 tickets across `open`, `assigned`, `in-progress`, and `done`
@@ -60,7 +60,8 @@ What seed currently creates:
 
 - Payload is embedded in the Next app.
 - Open `/admin` while running the app to access admin UI.
-- If you have no manager user, create one from admin or run the seed script.
+- Only users with role `admin` can access the Payload CMS admin portal.
+- The first user created in an empty database is automatically assigned role `admin`.
 
 ## Upload Storage
 
