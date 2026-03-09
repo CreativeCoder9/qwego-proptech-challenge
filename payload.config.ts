@@ -16,26 +16,23 @@ export default buildConfig({
     },
   }),
   email: await nodemailerAdapter({
-    defaultFromAddress: process.env.SMTP_FROM_ADDRESS || "no-reply@propertymanager.local",
+    defaultFromAddress: process.env.SMTP_FROM_ADDRESS || "no-reply@property-manager.local",
     defaultFromName: process.env.SMTP_FROM_NAME || "Property Manager",
     transportOptions:
       process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS
         ? {
-            auth: {
-              pass: process.env.SMTP_PASS,
-              user: process.env.SMTP_USER,
-            },
-            host: process.env.SMTP_HOST,
-            port: Number(process.env.SMTP_PORT || 587),
-            secure: process.env.SMTP_SECURE === "true",
-          }
+          auth: {
+            pass: process.env.SMTP_PASS,
+            user: process.env.SMTP_USER,
+          },
+          host: process.env.SMTP_HOST,
+          port: Number(process.env.SMTP_PORT || 587),
+          secure: process.env.SMTP_SECURE === "true",
+        }
         : undefined,
   }),
   collections: [Users, Media, Tickets, ActivityLogs, Notifications],
   admin: {
     user: Users.slug,
-    components: {
-      beforeDashboard: ["/src/components/payload/AdminDashboardOverview"],
-    },
   },
 });
