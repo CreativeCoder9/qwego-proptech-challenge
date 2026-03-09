@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 const AUTH_PAGES = new Set(["/login", "/register"]);
+const PUBLIC_PAGES = new Set(["/"]);
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -9,14 +10,19 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get("payload-token")?.value;
   const isAuthenticated = Boolean(token);
   const isAuthPage = AUTH_PAGES.has(pathname);
+  const isPublicPage = PUBLIC_PAGES.has(pathname);
 
-  if (!isAuthenticated && !isAuthPage) {
+  if (!isAuthenticated && !isAuthPage && !isPublicPage) {
     const loginURL = new URL("/login", request.url);
     loginURL.searchParams.set("next", pathname === "/" ? "/dashboard" : pathname);
     return NextResponse.redirect(loginURL);
   }
 
   if (isAuthenticated && isAuthPage) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  if (isAuthenticated && pathname === "/") {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 

@@ -15,20 +15,20 @@ type AppShellProps = {
   user: AppUser | null;
 };
 
-const AUTH_ROUTES = new Set(["/login", "/register"]);
+const PUBLIC_ROUTES = new Set(["/", "/login", "/register"]);
 
 export const AppShell = ({ children, user }: AppShellProps) => {
   const router = useRouter();
   const pathname = usePathname() ?? "/";
-  const isAuthRoute = AUTH_ROUTES.has(pathname);
+  const isPublicRoute = PUBLIC_ROUTES.has(pathname);
 
   useEffect(() => {
-    if (!isAuthRoute && !user) {
+    if (!isPublicRoute && !user) {
       router.replace(`/login?next=${encodeURIComponent(pathname)}`);
     }
-  }, [isAuthRoute, pathname, router, user]);
+  }, [isPublicRoute, pathname, router, user]);
 
-  if (isAuthRoute) {
+  if (isPublicRoute) {
     return <>{children}</>;
   }
 
