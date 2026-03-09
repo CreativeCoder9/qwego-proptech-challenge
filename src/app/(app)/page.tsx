@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Building2, ShieldCheck, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WelcomeSection } from "@/src/components/dashboard/WelcomeSection";
+import { getCurrentUser } from "@/src/lib/auth";
+import { getPayloadClient } from "@/src/lib/payload";
 
 const highlights = [
   {
@@ -21,9 +24,42 @@ const highlights = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const currentUser = await getCurrentUser();
+
+  if (currentUser?.id) {
+    redirect("/dashboard");
+  }
+
+  const payload = await getPayloadClient();
+  const usersResult = await payload.find({
+    collection: "users",
+    depth: 0,
+    limit: 1,
+    overrideAccess: true,
+  });
+  const hasNoUsers = usersResult.totalDocs === 0;
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-cyan-50 px-6 py-10 text-slate-900">
+      {hasNoUsers ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 px-4">
+          <div className="w-full max-w-lg rounded-2xl border border-cyan-200 bg-white p-6 shadow-xl">
+            <p className="text-xs font-semibold uppercase tracking-wide text-cyan-700">Setup Required</p>
+            <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-900">Create Your Admin Account</h2>
+            <p className="mt-2 text-sm text-slate-600">
+              No users exist yet. Open the Payload admin portal and create the first account. It will be automatically
+              assigned the <span className="font-semibold text-slate-800">admin</span> role.
+            </p>
+            <div className="mt-5">
+              <Button render={<Link href="/admin" />} nativeButton={false}>
+                Open /admin
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
         <WelcomeSection />
 

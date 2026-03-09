@@ -7,7 +7,7 @@ type BusinessInfoItem = {
   value: string;
 };
 
-const businessName = process.env.BUSINESS_NAME || "Sky Properties";
+const businessName = process.env.BUSINESS_NAME || "Property Manager";
 const businessTagline =
   process.env.BUSINESS_TAGLINE || "Track operations, team performance, and tenant requests in one place.";
 
