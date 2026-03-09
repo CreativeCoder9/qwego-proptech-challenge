@@ -37,9 +37,8 @@ const getPortalURL = (): string => {
 };
 
 export default function AdminDashboardOverview() {
-  const businessName = process.env.BUSINESS_NAME || "Lorem Ipsam Property";
-  const businessTagline =
-    process.env.BUSINESS_TAGLINE || "This is admin portal please click the button below to open the management portal";
+  const businessName = "Property Manager Admin Portal";
+  const businessTagline = "This portal is only accessible to admin users. Please click the button below to open the management portal";
 
   const businessInfo: BusinessItem[] = [
     {
