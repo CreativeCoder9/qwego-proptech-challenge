@@ -34,5 +34,8 @@ export default buildConfig({
   collections: [Users, Media, Tickets, ActivityLogs, Notifications],
   admin: {
     user: Users.slug,
+    components: {
+      beforeDashboard: ["/src/components/payload/AdminDashboardOverview"],
+    },
   },
 });
