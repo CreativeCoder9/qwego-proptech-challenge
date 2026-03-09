@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/src/lib/auth";
 import { getPayloadClient } from "@/src/lib/payload";
 import { RecentTickets, type RecentTicket } from "@/src/components/dashboard/RecentTickets";
 import { StatsCards, type StatsCounts } from "@/src/components/dashboard/StatsCards";
+import { WelcomeSection } from "@/src/components/dashboard/WelcomeSection";
 
 type TicketStatus = "open" | "assigned" | "in-progress" | "done";
 type TicketDoc = {
@@ -98,6 +99,7 @@ export default async function DashboardPage() {
         <p className="text-sm text-muted-foreground">Track ticket progress and team workload in one place.</p>
       </section>
 
+      <WelcomeSection />
       <StatsCards counts={counts} />
       <RecentTickets tickets={recentTickets} />
     </div>
