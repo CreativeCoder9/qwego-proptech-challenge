@@ -1,26 +1,26 @@
 # Task Implementation Summary (PropTech MVP)
 
-This document captures the important implementation details for the completed challenge scope so future engineers can onboard quickly.
+This file summarizes what is currently implemented and where core behavior lives.
 
 ## Scope Status
 
-All planned implementation steps in `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/plan.md` are marked complete, including:
+The planned MVP work under `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/plan.md` is implemented, including:
 
 - Auth + RBAC
-- Ticket create/list/detail + manager/technician actions
-- Activity logs
-- Notifications page and bell
-- Final polish (loading states, empty states, responsiveness, lint/typecheck/build)
+- Ticket create/list/detail flows
+- Manager/technician action paths
+- Activity logs and notifications
+- Responsive and loading/empty-state polish
 
 ## Architecture at a Glance
 
 - Frontend: Next.js 15 App Router (`src/app`)
-- Backend/CMS/API: Payload CMS v3 (mounted via `src/app/api/[...slug]/route.ts`)
-- DB: SQLite (`payload.db`)
+- Backend/API: Payload CMS v3 via `src/app/api/[...slug]/route.ts`
+- DB: SQLite (`payload.db` default)
 - UI: shadcn/ui + Tailwind CSS
-- State/data on client: React Query (`QueryProvider`)
+- Client data state: React Query (`QueryProvider`)
 
-Core configuration:
+Core config files:
 
 - `payload.config.ts`
 - `next.config.ts`
@@ -28,9 +28,13 @@ Core configuration:
 
 ## Role Model and Access
 
-Roles: `tenant | manager | technician`
+Roles:
 
-Primary collection access is implemented in:
+- `tenant`
+- `manager`
+- `technician`
+
+Primary access implementation:
 
 - `src/collections/Users.ts`
 - `src/collections/Tickets.ts`
@@ -38,38 +42,33 @@ Primary collection access is implemented in:
 - `src/collections/Notifications.ts`
 - `src/lib/access.ts`
 
-Access model highlights:
+## Ticket Workflow and Side Effects
 
-- Tenant: create/read own tickets
-- Manager: read/update all tickets, assign/update workflow
-- Technician: read/update assigned tickets
-- Notifications: user can read/update only own notifications
-- Activity logs: server-driven writes; role-filtered reads
+Workflow enforcement:
 
-## Important Workflow Logic
+- `src/collections/Tickets.ts`
 
-Ticket side effects are centralized in:
+Hook side effects:
 
 - `src/hooks/tickets/afterChangeTicket.ts`
 - `src/hooks/tickets/createActivityLog.ts`
 
-Implemented behavior:
+Implemented side effects:
 
-- On ticket creation: activity log + manager notifications
-- On assignment changes: activity log + technician notification
-- On status changes: activity log + recipient notifications (technician/tenant as applicable)
-- On priority changes: activity log
+- On create: activity log + manager notifications
+- On assignment change: activity log + assignee notification
+- On status change: activity log + role-targeted notifications
+- On priority change: activity log
 
-## UI and Route Map
+## Route and UI Map
 
-Auth and shell:
+Auth/shell:
 
 - `/login`, `/register`
-- protected shell in `src/app/(app)/layout.tsx`
-- app chrome:
-  - `src/components/layout/AppShell.tsx`
-  - `src/components/layout/Sidebar.tsx`
-  - `src/components/layout/Header.tsx`
+- `src/app/(app)/layout.tsx`
+- `src/components/layout/AppShell.tsx`
+- `src/components/layout/Sidebar.tsx`
+- `src/components/layout/Header.tsx`
 
 Dashboard:
 
@@ -79,47 +78,31 @@ Dashboard:
 
 Tickets:
 
-- `/tickets` (role-aware list)
-- `/tickets/new` (tenant-only create)
-- `/tickets/[id]` (detail + action panels)
+- `/tickets`
+- `/tickets/new`
+- `/tickets/[id]` (detail + actions + activity timeline)
 
 Notifications:
 
-- Bell: `src/components/notifications/NotificationBell.tsx`
-- Page: `/notifications`
-- List/actions: `src/components/notifications/NotificationsList.tsx`
+- `/notifications`
+- `src/components/notifications/NotificationBell.tsx`
+- `src/components/notifications/NotificationsList.tsx`
 
-## Notifications Behavior (Important)
+## Operational Notes
 
-- "Open Ticket" does **not** block navigation if mark-read fails.
-- Mark-read is best-effort; user gets toast feedback on failure.
-- "Mark all as read" uses `Promise.allSettled` and reports partial failures.
-- Global toaster is mounted in `src/app/layout.tsx`.
+- Root layout `src/app/layout.tsx` is pass-through by design.
+- Toaster is mounted in `src/app/(app)/layout.tsx`.
+- Ticket create uploads media before creating ticket and performs best-effort cleanup on failure.
+- Notification read updates are best-effort and should not block ticket navigation.
 
-Why this matters:
+## Seed and Verification
 
-- Notification read state is non-critical; ticket navigation should remain reliable.
+Seed:
 
-## Loading, Empty States, and Mobile
-
-Implemented polish:
-
-- Route loading UI:
-  - `src/app/(app)/dashboard/loading.tsx`
-  - `src/app/(app)/tickets/loading.tsx`
-- Empty-state UX for ticket/dash lists
-- Mobile navigation pattern:
-  - bottom nav on small screens
-  - collapsible icon sidebar on `md+`
-
-## Seed and Local Verification
-
-Seed script:
-
-- `npm run seed`
+- `npm run seed` (requires `SEED_PASSWORD`)
 - File: `src/seed.ts`
 
-Recommended validation commands:
+Validation:
 
 ```bash
 npm run lint
@@ -127,32 +110,23 @@ npm run typecheck
 npm run build
 ```
 
-## Environment and Ignore Rules
+## Environment
 
-Required env:
+Recommended env variables:
 
 - `PAYLOAD_SECRET`
-- `DATABASE_URL` (defaults to local sqlite if omitted)
+- `DATABASE_URL`
+- `SEED_PASSWORD` (required for seed command)
 
-`.gitignore` notes:
+Template:
 
-- Includes generated artifacts (`node_modules`, `.next`, logs, db artifacts, etc.)
-- Keeps template env files committed via:
-  - `!.env.example`
-  - `!.env.sample`
+- `.env.example`
 
-## High-Value Files to Read First
+## First Files to Read
 
-1. `payload.config.ts`
-2. `src/collections/Tickets.ts`
-3. `src/hooks/tickets/afterChangeTicket.ts`
-4. `src/lib/auth.ts`
-5. `middleware.ts`
-6. `src/components/tickets/TicketActionsPanel.tsx`
-7. `src/components/notifications/NotificationsList.tsx`
-
-## Known Residual Risks / Follow-up Ideas
-
-- Notification updates are currently client-driven over REST; a dedicated bulk-read endpoint could reduce request count.
-- Build may show non-blocking environment warnings (lockfile/plugin detection) depending on machine setup.
-- Add integration tests for role-based route access and ticket status transitions.
+1. `docs/BUSINESS-LOGIC.md`
+2. `payload.config.ts`
+3. `src/collections/Tickets.ts`
+4. `src/hooks/tickets/afterChangeTicket.ts`
+5. `src/lib/auth.ts`
+6. `middleware.ts`

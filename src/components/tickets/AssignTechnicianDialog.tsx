@@ -59,6 +59,10 @@ export const AssignTechnicianDialog = ({
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTechnicianId, setSelectedTechnicianId] = useState<string>(assignedToId ? String(assignedToId) : "");
+  const technicianItems = technicians.map((technician) => ({
+    label: technician.name ?? technician.email ?? `Technician ${technician.id}`,
+    value: String(technician.id),
+  }));
 
   const submitAssignment = async () => {
     if (!selectedTechnicianId) {
@@ -70,9 +74,10 @@ export const AssignTechnicianDialog = ({
     setIsSubmitting(true);
 
     try {
+      const numericId = Number(selectedTechnicianId);
       const response = await fetch(`/api/tickets/${ticketId}`, {
         body: JSON.stringify({
-          assignedTo: selectedTechnicianId,
+          assignedTo: Number.isNaN(numericId) ? selectedTechnicianId : numericId,
         }),
         credentials: "include",
         headers: {
@@ -107,7 +112,7 @@ export const AssignTechnicianDialog = ({
 
         <div className="space-y-2">
           <Label htmlFor="assign-technician">Technician</Label>
-          <Select items={[]} onValueChange={(value) => setSelectedTechnicianId(value ?? "")} value={selectedTechnicianId}>
+          <Select items={technicianItems} onValueChange={(value) => setSelectedTechnicianId(value ?? "")} value={selectedTechnicianId}>
             <SelectTrigger className="w-full" id="assign-technician">
               <SelectValue placeholder="Select technician" />
             </SelectTrigger>

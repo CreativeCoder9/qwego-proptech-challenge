@@ -75,7 +75,7 @@ export const AppSidebar = ({ user }: { user: AppUser }) => {
           <SidebarMenuItem>
             <SidebarMenuButton className="font-semibold" size="lg" render={<Link href="/dashboard" />}>
               <House className="size-4" />
-              <span>Qwego Property</span>
+              <span>Property Manager</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

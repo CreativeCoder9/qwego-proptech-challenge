@@ -12,7 +12,7 @@ import { afterChangeTicket } from "@/src/hooks/tickets/afterChangeTicket";
 type TicketStatus = "open" | "assigned" | "in-progress" | "done";
 
 const nextStatus: Record<TicketStatus, TicketStatus[]> = {
-  open: ["assigned"],
+  open: ["assigned", "done"],
   assigned: ["in-progress"],
   "in-progress": ["done"],
   done: [],
@@ -127,8 +127,24 @@ export const Tickets: CollectionConfig = {
               });
             }
 
+            // Technicians may progress status only on their own assigned ticket.
+            // If an assignedTo value is present, it must not change.
+            if ("assignedTo" in data) {
+              const requestedAssignedTo = normalizeRelationId(data.assignedTo);
+
+              if (!requestedAssignedTo || String(requestedAssignedTo) !== String(assignedTo)) {
+                throw new ValidationError({
+                  errors: [
+                    {
+                      message: "Technicians cannot reassign tickets.",
+                      path: "assignedTo",
+                    },
+                  ],
+                });
+              }
+            }
+
             const forbiddenTechnicianFields = [
-              "assignedTo",
               "priority",
               "tenant",
               "title",
@@ -141,6 +157,29 @@ export const Tickets: CollectionConfig = {
 
             for (const field of forbiddenTechnicianFields) {
               if (field in data) {
+                const incomingValue = (data as Record<string, unknown>)[field];
+                const previousValue = (originalDoc as Record<string, unknown> | undefined)?.[field];
+
+                // Payload may include unchanged fields on patch updates.
+                // Block only when technician attempts to change a manager-owned field.
+                if (typeof incomingValue === "undefined") {
+                  continue;
+                }
+
+                const hasChanged =
+                  field === "tenant"
+                    ? String(normalizeRelationId(incomingValue as null | number | string | { id?: number | string } | undefined)) !==
+                      String(
+                        normalizeRelationId(
+                          previousValue as null | number | string | { id?: number | string } | undefined,
+                        ),
+                      )
+                    : JSON.stringify(incomingValue) !== JSON.stringify(previousValue);
+
+                if (!hasChanged) {
+                  continue;
+                }
+
                 throw new ValidationError({
                   errors: [
                     {
@@ -196,7 +235,7 @@ export const Tickets: CollectionConfig = {
             });
           }
 
-          if ((incomingStatus === "in-progress" || incomingStatus === "done") && !incomingAssignedTo) {
+          if (incomingStatus === "in-progress" && !incomingAssignedTo) {
             throw new ValidationError({
               errors: [
                 {
@@ -280,7 +319,10 @@ export const Tickets: CollectionConfig = {
         { label: "Critical", value: "critical" },
       ],
       access: {
-        update: ({ req }) => isManager(req.user as RequestUser | null | undefined),
+        update: ({ req }) => {
+          const user = req.user as RequestUser | null | undefined;
+          return isManager(user) || isTechnician(user);
+        },
       },
     },
     {
@@ -328,7 +370,10 @@ export const Tickets: CollectionConfig = {
         },
       },
       access: {
-        update: ({ req }) => isManager(req.user as RequestUser | null | undefined),
+        update: ({ req }) => {
+          const user = req.user as RequestUser | null | undefined;
+          return isManager(user) || isTechnician(user);
+        },
       },
     },
     {

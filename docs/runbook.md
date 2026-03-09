@@ -13,17 +13,19 @@ npm install
 
 ## Environment Variables
 
-Create `.env.local` (or `.env`) with at least:
+Copy from `.env.example` and set values:
 
 ```bash
 PAYLOAD_SECRET=replace-with-a-strong-secret
 DATABASE_URL=file:./payload.db
+SEED_PASSWORD=ChangeMe-Seed-2026
 ```
 
 Notes:
 
-- `PAYLOAD_SECRET` has a fallback in code (`dev-secret-change-me`) but should be set explicitly.
+- `PAYLOAD_SECRET` has a code fallback (`dev-secret-change-me`) but should always be set explicitly.
 - `DATABASE_URL` defaults to local SQLite in project root if omitted.
+- `SEED_PASSWORD` is required only for `npm run seed` and must be at least 12 characters.
 
 ## Run in Development
 
@@ -39,26 +41,37 @@ npm run typecheck
 npm run build
 ```
 
+## Seed Demo Data
+
+PowerShell example:
+
+```powershell
+$env:SEED_PASSWORD="ChangeMe-Seed-2026"; npm run seed
+```
+
+What seed currently creates:
+
+- 1 manager
+- 2 technicians
+- 2 tenants
+- 5 tickets across `open`, `assigned`, `in-progress`, and `done`
+
 ## Payload Admin
 
 - Payload is embedded in the Next app.
 - Open `/admin` while running the app to access admin UI.
-- On first run, create the initial user through admin if prompted.
+- If you have no manager user, create one from admin or run the seed script.
 
 ## Upload Storage
 
-- Media uploads are configured to write under `media` (outside Next `public/`).
+- Media uploads are configured to write under `media`.
 - Generated image sizes: `thumbnail`, `medium`.
-- Do not move uploads back under `public/` unless you intentionally make files public.
+- Access is still governed by Payload collection access (`src/collections/Media.ts`).
 
 ## Useful Paths
 
-- Task artifacts/spec/plan:
-  - `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/spec.md`
-  - `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/plan.md`
-- Payload config:
-  - `payload.config.ts`
-- Collections:
-  - `src/collections/*`
-- Shared access helpers:
-  - `src/lib/access.ts`
+- `payload.config.ts`
+- `src/collections/*`
+- `src/hooks/tickets/*`
+- `src/lib/access.ts`
+- `docs/BUSINESS-LOGIC.md`

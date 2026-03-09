@@ -1,136 +1,122 @@
 # Engineering Handoff - PropTech MVP
 
-This file is a practical handoff for the next engineer continuing implementation.
+This handoff captures the current, implemented system behavior for the next engineer.
 
 ## Project Snapshot
-- Stack: Next.js 15 App Router + Payload CMS v3 + SQLite + shadcn/ui.
-- Status: MVP implementation complete, including ticket list, creation form, details/actions, and notifications.
-- Source of truth for scope and sequence:
+
+- Stack: Next.js 15 App Router + Payload CMS v3 + SQLite + shadcn/ui
+- Status: MVP feature scope is implemented end-to-end
+- Scope references:
   - `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/spec.md`
   - `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/plan.md`
 
-## What Is Implemented
+## Implemented Areas
 
-### Data model and access control
+### Data model and RBAC
+
 - Collections in `payload.config.ts`:
   - `users`, `media`, `tickets`, `activity-logs`, `notifications`
 - Role model:
   - `tenant | manager | technician`
-- Key access logic:
+- Access logic:
   - `src/collections/Users.ts`
   - `src/collections/Tickets.ts`
   - `src/collections/ActivityLogs.ts`
   - `src/collections/Notifications.ts`
+  - shared helpers in `src/lib/access.ts`
 
-### Ticket workflow and hooks
-- Ticket transition and guardrails are enforced server-side.
-- Side effects (activity logs + notifications) are in:
+### Ticket workflow and side effects
+
+- Server-side workflow enforcement in `src/collections/Tickets.ts`
+- Hook side effects in:
   - `src/hooks/tickets/afterChangeTicket.ts`
   - `src/hooks/tickets/createActivityLog.ts`
+- Includes:
+  - strict status transitions
+    - `open -> assigned -> in-progress -> done`
+    - `open -> done` is allowed for manager fast-close
+  - assignment/status consistency checks
+    - `in-progress` requires an assignee
+    - `done` can be set without assignee from `open`
+  - activity log generation
+  - manager/technician/tenant notifications based on event type
 
-### Seed data
-- Script: `npm run seed`
-- File: `src/seed.ts`
-- Creates demo manager/tenant/technician users and tickets in multiple statuses.
+### Auth and route protection
 
-### Auth and route protection (recently completed)
-- Payload REST route handler:
+- Payload REST route:
   - `src/app/api/[...slug]/route.ts`
 - Server helpers:
-  - `src/lib/payload.ts` (`server-only`, singleton Payload client)
-  - `src/lib/auth.ts` (`server-only`, reads `payload-token`)
+  - `src/lib/payload.ts`
+  - `src/lib/auth.ts`
 - Client providers:
   - `src/components/providers/AuthProvider.tsx`
   - `src/components/providers/QueryProvider.tsx`
-  - Alias re-exports in `components/providers/*` for import consistency
 - Auth pages:
   - `src/app/(app)/login/page.tsx`
   - `src/app/(app)/register/page.tsx`
 - Middleware:
   - `middleware.ts`
 
-### Layout and dashboard (recently completed)
-- App shell + role-aware navigation:
+### App shell and product routes
+
+- Shell/navigation:
   - `src/components/layout/AppShell.tsx`
   - `src/components/layout/Sidebar.tsx`
   - `src/components/layout/Header.tsx`
-  - `src/components/layout/utils.ts`
-- Dashboard widgets:
+- Dashboard:
+  - `src/app/(app)/dashboard/page.tsx`
   - `src/components/dashboard/StatsCards.tsx`
   - `src/components/dashboard/RecentTickets.tsx`
-- Notifications bell (polling unread count every 30s):
+- Tickets:
+  - `src/app/(app)/tickets/page.tsx`
+  - `src/app/(app)/tickets/new/page.tsx`
+  - `src/app/(app)/tickets/[id]/page.tsx`
+  - `src/components/tickets/*`
+- Notifications:
+  - `src/app/(app)/notifications/page.tsx`
   - `src/components/notifications/NotificationBell.tsx`
-- Server dashboard route:
-  - `src/app/(app)/dashboard/page.tsx`
+  - `src/components/notifications/NotificationsList.tsx`
 
-### Ticket list and create form (recently completed)
-- Routes:
-  - `src/app/(app)/tickets/page.tsx` (role-aware list + server pagination)
-  - `src/app/(app)/tickets/new/page.tsx` (tenant-only create)
-  - `src/app/(app)/tickets/[id]/page.tsx` (minimal detail route to support list navigation)
-- Components:
-  - `src/components/tickets/StatusBadge.tsx`
-  - `src/components/tickets/PriorityBadge.tsx`
-  - `src/components/tickets/TicketCard.tsx`
-  - `src/components/tickets/TicketsDataTable.tsx`
-  - `src/components/tickets/TicketForm.tsx`
-  - `src/components/tickets/types.ts`
-- Form stack:
-  - `react-hook-form` + `@hookform/resolvers` + `zod`
-- Upload behavior:
-  - Images are uploaded to `/api/media` first, then ticket is created via `/api/tickets`.
-  - On create failure after upload, best-effort cleanup deletes uploaded media records to reduce orphaned files.
+## Important Runtime Notes
 
-## Important Auth/Middleware Notes
-- Middleware is intentionally coarse:
-  - checks only presence of `payload-token` cookie
-  - blocks unauthenticated access to protected routes
-  - redirects authenticated users away from `/login` and `/register`
-- Middleware now excludes non-app routes at matcher level:
-  - `/api`, `/admin`, `/_next/*`, `/media`, `favicon.ico`, and static files
-- Redirect target for authenticated users on auth pages is `/dashboard`.
-- Login `next` param is sanitized to prevent open redirects:
-  - only internal paths are allowed
-  - external/protocol-relative values fall back to `/`
-- Middleware special-case: unauthenticated requests to `/` get `next=/dashboard` to avoid an extra post-login redirect hop.
+## Layout boundaries
 
-## Important Dashboard/RBAC Notes
-- Dashboard reads from `tickets` intentionally use Payload local API with:
-  - `overrideAccess: false`
-  - `user: currentUser`
-- This preserves centralized collection access control. Do not switch dashboard reads to `overrideAccess: true` without a strong reason and explicit safety guardrails.
+- Root `src/app/layout.tsx` is pass-through.
+- `<html>/<body>`, providers, and toaster are in `src/app/(app)/layout.tsx`.
+- Payload admin layout is in route group `src/app/(payload)`.
 
-## Current Gaps (Next Work)
-- The core MVP implementation is complete. Future enhancements could include reporting features, performance optimizations, and integrations.
+## Middleware behavior
 
-## Runbook
-- Install: `npm install`
-- Dev: `npm run dev`
-- Typecheck: `npm run typecheck`
-- Lint: `npm run lint`
-- Build: `npm run build`
-- Seed (PowerShell example):
-  - `$env:SEED_PASSWORD="ChangeMe-Seed-2026"; npm run seed`
+- Middleware treats `/login` and `/register` as auth pages.
+- Unauthenticated users are redirected to `/login?next=...`.
+- Requests to `/` use `next=/dashboard` to avoid an extra hop after login.
+- Authenticated users on auth pages are redirected to `/dashboard`.
+- Middleware validates cookie presence, not token validity (server checks happen in Payload routes).
 
-## Environment Variables
-- `PAYLOAD_SECRET` (recommended)
-- `DATABASE_URL` (optional; defaults to `file:./payload.db`)
-- `SEED_PASSWORD` (required for seed script)
+## Query safety pattern
 
-## Practical Gotchas
-- Remove or avoid introducing App Router/Pages Router route conflicts for the same path (e.g., both `app/(app)/dashboard/page.tsx` and `pages/dashboard.tsx`).
-- Keep server-only boundaries:
-  - do not import `src/lib/payload.ts` or `src/lib/auth.ts` from client components.
-- For activity log visibility, ensure log rows contain required denormalized fields expected by access filters.
-- Ticket list query intentionally uses role-aware depth:
-  - manager: `depth: 1` (needs relation names)
-  - tenant/technician: `depth: 0` (lighter payload and avoids expecting restricted user relation data)
-- Ticket table columns intentionally hide `Tenant`/`Technician` for non-managers to match current `users` read access model.
+For user-facing server reads, preserve:
+
+- `overrideAccess: false`
+- `user: currentUser`
+
+This is how dashboard and tickets honor centralized RBAC.
+
+## Seed and Local Ops
+
+- Script: `npm run seed`
+- File: `src/seed.ts`
+- Required env: `SEED_PASSWORD` (>= 12 chars)
+- Also uses:
+  - `PAYLOAD_SECRET`
+  - `DATABASE_URL` (optional; defaults to local sqlite path)
 
 ## Suggested Reading Order
-1. `payload.config.ts`
-2. `src/collections/Tickets.ts`
-3. `src/hooks/tickets/afterChangeTicket.ts`
-4. `src/components/providers/AuthProvider.tsx`
-5. `middleware.ts`
-6. `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1a/plan.md`
+
+1. `docs/BUSINESS-LOGIC.md`
+2. `payload.config.ts`
+3. `src/collections/Tickets.ts`
+4. `src/hooks/tickets/afterChangeTicket.ts`
+5. `src/lib/auth.ts`
+6. `middleware.ts`
+7. `src/components/tickets/TicketActionsPanel.tsx`

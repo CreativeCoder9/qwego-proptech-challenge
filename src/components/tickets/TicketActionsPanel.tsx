@@ -36,7 +36,7 @@ const NEXT_STATUS: Record<TicketStatus, TicketStatus[]> = {
   assigned: ["in-progress"],
   done: [],
   "in-progress": ["done"],
-  open: ["assigned"],
+  open: ["assigned", "done"],
 };
 
 const extractErrorMessage = async (response: Response): Promise<string> => {
@@ -79,11 +79,23 @@ export const TicketActionsPanel = ({
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [isUpdatingPriority, setIsUpdatingPriority] = useState(false);
   const [isUpdatingTechnicianStatus, setIsUpdatingTechnicianStatus] = useState(false);
+  const hasAssignment = Boolean(currentAssignedToId);
 
   const managerStatusOptions = useMemo(() => {
     const options = [currentStatus, ...NEXT_STATUS[currentStatus]];
-    return Array.from(new Set(options));
-  }, [currentStatus]);
+
+    return Array.from(new Set(options)).filter((option) => {
+      if (option === currentStatus) {
+        return true;
+      }
+
+      if (!hasAssignment && option === "in-progress") {
+        return false;
+      }
+
+      return true;
+    });
+  }, [currentStatus, hasAssignment]);
 
   const canTechnicianUpdate =
     role === "technician" &&
@@ -113,6 +125,11 @@ export const TicketActionsPanel = ({
 
     if (selectedStatus === "assigned" && !currentAssignedToId) {
       setError("Assign a technician before moving status to Assigned.");
+      return;
+    }
+
+    if (selectedStatus === "in-progress" && !currentAssignedToId) {
+      setError("Assign a technician before moving status to In Progress.");
       return;
     }
 
