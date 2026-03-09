@@ -5,6 +5,7 @@ import { createActivityLog } from "./createActivityLog";
 type TicketStatus = "open" | "assigned" | "in-progress" | "done";
 type TicketPriority = "low" | "medium" | "high" | "critical";
 type RelationValue = null | number | string | { id?: number | string } | undefined;
+type UserContact = { email?: string; name?: string };
 
 type TicketDoc = {
   id: number | string;
@@ -17,15 +18,15 @@ type TicketDoc = {
 
 type NotificationType = "ticket-created" | "ticket-assigned" | "status-update";
 
-const getUserNameById = async ({
+const getUserContactById = async ({
   req,
   userId,
 }: {
   req: Parameters<CollectionAfterChangeHook>[0]["req"];
   userId: number | string | undefined;
-}): Promise<string | undefined> => {
+}): Promise<UserContact> => {
   if (!userId) {
-    return undefined;
+    return {};
   }
 
   const user = await req.payload.findByID({
@@ -36,14 +37,18 @@ const getUserNameById = async ({
     req,
   });
 
-  const name = (user as { name?: string } | null | undefined)?.name;
-  return name || undefined;
+  const resolvedUser = user as { email?: string; name?: string } | null | undefined;
+
+  return {
+    email: resolvedUser?.email || undefined,
+    name: resolvedUser?.name || undefined,
+  };
 };
 
 const findAllManagers = async (
   req: Parameters<CollectionAfterChangeHook>[0]["req"],
-): Promise<Array<{ id: number | string }>> => {
-  const managers: Array<{ id: number | string }> = [];
+): Promise<Array<{ email?: string; id: number | string; name?: string }>> => {
+  const managers: Array<{ email?: string; id: number | string; name?: string }> = [];
   let page = 1;
   const limit = 100;
 
@@ -62,7 +67,13 @@ const findAllManagers = async (
       },
     });
 
-    managers.push(...response.docs.map((doc) => ({ id: doc.id })));
+    managers.push(
+      ...response.docs.map((doc) => ({
+        email: (doc as { email?: string }).email,
+        id: doc.id,
+        name: (doc as { name?: string }).name,
+      })),
+    );
 
     if (!response.hasNextPage) {
       break;
@@ -74,15 +85,47 @@ const findAllManagers = async (
   return managers;
 };
 
+const sendNotificationEmail = async ({
+  message,
+  recipientEmail,
+  recipientName,
+  req,
+  ticketId,
+}: {
+  message: string;
+  recipientEmail: string;
+  recipientName?: string;
+  req: Parameters<CollectionAfterChangeHook>[0]["req"];
+  ticketId: number | string;
+}): Promise<void> => {
+  const appBaseURL = process.env.APP_BASE_URL?.replace(/\/$/, "");
+  const ticketPath = `/tickets/${ticketId}`;
+  const ticketURL = appBaseURL ? `${appBaseURL}${ticketPath}` : ticketPath;
+
+  await req.payload.sendEmail({
+    subject: `Qwego Update: ${message}`,
+    text: `${recipientName ? `Hi ${recipientName},` : "Hello,"}
+
+${message}
+
+Open ticket: ${ticketURL}`,
+    to: recipientEmail,
+  });
+};
+
 const createNotification = async ({
   message,
   recipient,
+  recipientEmail,
+  recipientName,
   req,
   ticketId,
   type,
 }: {
   message: string;
   recipient: RelationValue;
+  recipientEmail?: string;
+  recipientName?: string;
   req: Parameters<CollectionAfterChangeHook>[0]["req"];
   ticketId: number | string;
   type: NotificationType;
@@ -105,6 +148,36 @@ const createNotification = async ({
     overrideAccess: true,
     req,
   });
+
+  let resolvedEmail = recipientEmail;
+  let resolvedName = recipientName;
+
+  if ((!resolvedEmail || !resolvedName) && recipientId) {
+    const recipientContact = await getUserContactById({ req, userId: recipientId });
+    resolvedEmail = resolvedEmail || recipientContact.email;
+    resolvedName = resolvedName || recipientContact.name;
+  }
+
+  if (!resolvedEmail) {
+    return;
+  }
+
+  try {
+    await sendNotificationEmail({
+      message,
+      recipientEmail: resolvedEmail,
+      recipientName: resolvedName,
+      req,
+      ticketId,
+    });
+  } catch (error) {
+    console.error("Failed to send notification email", {
+      error,
+      recipientEmail: resolvedEmail,
+      ticketId,
+      type,
+    });
+  }
 };
 
 export const afterChangeTicket: CollectionAfterChangeHook = async ({
@@ -133,6 +206,8 @@ export const afterChangeTicket: CollectionAfterChangeHook = async ({
         createNotification({
           message: `New maintenance ticket: "${currentTicket.title ?? "Untitled"}".`,
           recipient: manager.id,
+          recipientEmail: manager.email,
+          recipientName: manager.name,
           req,
           ticketId: currentTicket.id,
           type: "ticket-created",
@@ -157,7 +232,8 @@ export const afterChangeTicket: CollectionAfterChangeHook = async ({
   let assignedTechnicianNotified = false;
 
   if (previousAssignedTo !== nextAssignedTo) {
-    const assigneeName = await getUserNameById({ req, userId: nextAssignedTo });
+    const assigneeContact = await getUserContactById({ req, userId: nextAssignedTo });
+    const assigneeName = assigneeContact.name;
     const assigneeLabel = assigneeName ?? (nextAssignedTo ? `technician ${nextAssignedTo}` : "none");
 
     await createActivityLog({
@@ -177,6 +253,8 @@ export const afterChangeTicket: CollectionAfterChangeHook = async ({
       await createNotification({
         message: `You were assigned ticket "${currentTicket.title ?? currentTicket.id}".`,
         recipient: nextAssignedTo,
+        recipientEmail: assigneeContact.email,
+        recipientName: assigneeContact.name,
         req,
         ticketId: currentTicket.id,
         type: "ticket-assigned",
