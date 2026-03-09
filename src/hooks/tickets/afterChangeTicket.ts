@@ -103,7 +103,7 @@ const sendNotificationEmail = async ({
   const ticketURL = appBaseURL ? `${appBaseURL}${ticketPath}` : ticketPath;
 
   await req.payload.sendEmail({
-    subject: `Qwego Update: ${message}`,
+    subject: `Property Manager Update: ${message}`,
     text: `${recipientName ? `Hi ${recipientName},` : "Hello,"}
 
 ${message}

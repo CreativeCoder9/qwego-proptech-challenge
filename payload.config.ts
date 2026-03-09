@@ -16,8 +16,8 @@ export default buildConfig({
     },
   }),
   email: await nodemailerAdapter({
-    defaultFromAddress: process.env.SMTP_FROM_ADDRESS || "no-reply@qwego.local",
-    defaultFromName: process.env.SMTP_FROM_NAME || "Qwego Property Manager",
+    defaultFromAddress: process.env.SMTP_FROM_ADDRESS || "no-reply@propertymanager.local",
+    defaultFromName: process.env.SMTP_FROM_NAME || "Property Manager",
     transportOptions:
       process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS
         ? {

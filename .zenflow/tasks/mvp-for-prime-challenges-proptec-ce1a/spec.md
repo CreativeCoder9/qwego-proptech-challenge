@@ -284,7 +284,7 @@ components/
 ## File Structure (Full)
 
 ```
-qwego-proptech-challenge/
+property-manager/
 ├── .gitignore
 ├── package.json
 ├── tsconfig.json

@@ -156,7 +156,7 @@ const run = async () => {
   console.log("Seed: Payload initialized.");
 
   const manager = await upsertUser(payload, {
-    email: "manager@qwego.local",
+    email: "manager@propertymanager.local",
     name: "Maya Manager",
     password: seedPassword,
     phone: "+1 555-0100",
@@ -164,7 +164,7 @@ const run = async () => {
   });
 
   const technicianA = await upsertUser(payload, {
-    email: "tech.ajay@qwego.local",
+    email: "tech.ajay@propertymanager.local",
     name: "Ajay Technician",
     password: seedPassword,
     phone: "+1 555-0101",
@@ -172,7 +172,7 @@ const run = async () => {
   });
 
   const technicianB = await upsertUser(payload, {
-    email: "tech.nina@qwego.local",
+    email: "tech.nina@propertymanager.local",
     name: "Nina Technician",
     password: seedPassword,
     phone: "+1 555-0102",
@@ -180,7 +180,7 @@ const run = async () => {
   });
 
   const tenantA = await upsertUser(payload, {
-    email: "tenant.alex@qwego.local",
+    email: "tenant.alex@propertymanager.local",
     name: "Alex Tenant",
     password: seedPassword,
     phone: "+1 555-0103",
@@ -189,7 +189,7 @@ const run = async () => {
   });
 
   const tenantB = await upsertUser(payload, {
-    email: "tenant.sam@qwego.local",
+    email: "tenant.sam@propertymanager.local",
     name: "Sam Tenant",
     password: seedPassword,
     phone: "+1 555-0104",
