@@ -7,6 +7,7 @@ import {
   ClipboardList,
   House,
   PlusSquare,
+  Users,
   Ticket,
   Wrench,
   type LucideIcon,
@@ -47,12 +48,14 @@ const NAV_BY_ROLE: Record<UserRole, NavigationItem[]> = {
   admin: [
     { href: "/dashboard", icon: House, label: "Dashboard" },
     { href: "/tickets", icon: Ticket, label: "All Tickets" },
+    { href: "/users", icon: Users, label: "People" },
     { href: "/notifications", icon: Bell, label: "Notifications" },
     { href: "/admin", icon: House, label: "Payload Admin" },
   ],
   manager: [
     { href: "/dashboard", icon: House, label: "Dashboard" },
     { href: "/tickets", icon: Ticket, label: "All Tickets" },
+    { href: "/users", icon: Users, label: "People" },
     { href: "/notifications", icon: Bell, label: "Notifications" },
   ],
   technician: [
