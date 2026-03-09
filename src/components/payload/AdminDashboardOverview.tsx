@@ -5,13 +5,32 @@ type BusinessItem = {
   value: string;
 };
 
-const getPortalURL = (): string => {
-  if (process.env.MANAGEMENT_PORTAL_URL) {
-    return process.env.MANAGEMENT_PORTAL_URL;
+const normalizePortalURL = (value?: string): string | null => {
+  if (!value) {
+    return null;
   }
 
-  if (process.env.APP_BASE_URL) {
-    return `${process.env.APP_BASE_URL.replace(/\/$/, "")}/dashboard`;
+  if (value.startsWith("/")) {
+    return value;
+  }
+
+  try {
+    return new URL(value).toString();
+  } catch {
+    return null;
+  }
+};
+
+const getPortalURL = (): string => {
+  const explicitURL = normalizePortalURL(process.env.MANAGEMENT_PORTAL_URL);
+
+  if (explicitURL) {
+    return explicitURL;
+  }
+
+  const baseURL = normalizePortalURL(process.env.APP_BASE_URL);
+  if (baseURL) {
+    return `${baseURL.replace(/\/$/, "")}/dashboard`;
   }
 
   return "/dashboard";
@@ -20,7 +39,7 @@ const getPortalURL = (): string => {
 export default function AdminDashboardOverview() {
   const businessName = process.env.BUSINESS_NAME || "Lorem Ipsam Property";
   const businessTagline =
-    process.env.BUSINESS_TAGLINE || "Delivering responsive, transparent, and reliable property operations.";
+    process.env.BUSINESS_TAGLINE || "This is admin portal please click the button below to open the management portal";
 
   const businessInfo: BusinessItem[] = [
     {
