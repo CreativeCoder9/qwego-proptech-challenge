@@ -34,5 +34,12 @@ export default buildConfig({
   collections: [Users, Media, Tickets, ActivityLogs, Notifications],
   admin: {
     user: Users.slug,
+    components: {
+      beforeDashboard: [
+        {
+          path: "./src/components/payload/AdminDashboardOverview.tsx",
+        },
+      ],
+    },
   },
 });
