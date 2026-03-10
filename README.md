@@ -7,6 +7,8 @@ A full-stack MVP application built for property management, handling tenants, ti
 - **SQLite / Turso**
 - **shadcn/ui & Tailwind CSS v4**
 
+**Live Demo:** https://proptechchallenge.vercel.app/
+
 ## Features
 
 - **Role-based Authentication**: Dashboards and access controls for `admin`, `manager`, `technician`, and `tenant` roles.
