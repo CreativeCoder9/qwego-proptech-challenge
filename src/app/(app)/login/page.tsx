@@ -81,6 +81,11 @@ export default function LoginPage() {
               type="password"
               value={password}
             />
+            <div className="text-right">
+              <Link className="text-sm font-medium text-foreground underline underline-offset-4" href="/admin/forgot">
+                Forgot password?
+              </Link>
+            </div>
           </div>
 
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
