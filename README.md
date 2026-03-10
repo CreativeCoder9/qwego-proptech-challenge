@@ -19,4 +19,4 @@ A full-stack MVP application built for property management, handling tenants, ti
 
 ## Getting Started
 
-Check out the detailed runbook in `docs/runbook.md` for information on setting up and running the application, seeding the database, and understanding the architecture.
+Check out the detailed runbook in `docs/runbook.md` for information on setting up and running the application and understanding the architecture.

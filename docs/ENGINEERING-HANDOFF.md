@@ -112,12 +112,9 @@ For user-facing server reads, preserve:
 
 This is how dashboard and tickets honor centralized RBAC.
 
-## Seed and Local Ops
+## Local Ops
 
-- Script: `npm run seed`
-- File: `src/seed.ts`
-- Required env: `SEED_PASSWORD` (>= 12 chars)
-- Also uses:
+- Core env:
   - `PAYLOAD_SECRET`
   - `DATABASE_URL` (optional; defaults to local sqlite path)
 

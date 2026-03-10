@@ -18,14 +18,12 @@ Copy from `.env.example` and set values:
 ```bash
 PAYLOAD_SECRET=replace-with-a-strong-secret
 DATABASE_URL=file:./payload.db
-SEED_PASSWORD=ChangeMe-Seed-2026
 ```
 
 Notes:
 
 - `PAYLOAD_SECRET` has a code fallback (`dev-secret-change-me`) but should always be set explicitly.
 - `DATABASE_URL` defaults to local SQLite in project root if omitted.
-- `SEED_PASSWORD` is required only for `npm run seed` and must be at least 12 characters.
 
 ## Run in Development
 
@@ -40,21 +38,6 @@ npm run lint
 npm run typecheck
 npm run build
 ```
-
-## Seed Demo Data
-
-PowerShell example:
-
-```powershell
-$env:SEED_PASSWORD="ChangeMe-Seed-2026"; npm run seed
-```
-
-What seed currently creates:
-
-- 1 admin
-- 2 technicians
-- 2 tenants
-- 5 tickets across `open`, `assigned`, `in-progress`, and `done`
 
 ## Payload Admin
 

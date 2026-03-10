@@ -163,12 +163,6 @@ npm run build
 npm run start
 ```
 
-Optional seed in non-production environments only:
-
-```bash
-SEED_PASSWORD='ChangeMe-Seed-2026' npm run seed
-```
-
 ## 13) Deploy on Vercel
 
 Use this flow if you want to host the app on Vercel.

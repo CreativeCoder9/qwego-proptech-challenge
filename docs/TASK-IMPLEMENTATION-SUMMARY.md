@@ -104,12 +104,7 @@ People:
 - Ticket create uploads media before creating ticket and performs best-effort cleanup on failure.
 - Notification read updates are best-effort and should not block ticket navigation.
 
-## Seed and Verification
-
-Seed:
-
-- `npm run seed` (requires `SEED_PASSWORD`)
-- File: `src/seed.ts`
+## Verification
 
 Validation:
 
@@ -125,7 +120,6 @@ Recommended env variables:
 
 - `PAYLOAD_SECRET`
 - `DATABASE_URL`
-- `SEED_PASSWORD` (required for seed command)
 
 Template:
 
