@@ -4,7 +4,7 @@ A full-stack MVP application built for property management, handling tenants, ti
 
 - **Next.js 15 (App Router)**
 - **Payload CMS v3**
-- **SQLite**
+- **SQLite / Turso**
 - **shadcn/ui & Tailwind CSS v4**
 
 ## Features

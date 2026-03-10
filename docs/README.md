@@ -10,6 +10,7 @@ This folder contains engineering notes for the PropTech MVP implementation.
 - [Business Logic](./BUSINESS-LOGIC.md)
 - [Runbook](./runbook.md)
 - [Known Gotchas](./known-gotchas.md)
+- [Deployment](./deployment.md)
 
 ## Purpose
 
