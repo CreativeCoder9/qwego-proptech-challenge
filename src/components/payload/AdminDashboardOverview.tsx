@@ -43,11 +43,11 @@ export default function AdminDashboardOverview() {
   const businessInfo: BusinessItem[] = [
     {
       label: "Head Office",
-      value: process.env.BUSINESS_ADDRESS || "221B Baker Street, London NW1",
+      value: process.env.BUSINESS_ADDRESS || "221B Lorem Ipsum, London NW1",
     },
     {
       label: "Support Email",
-      value: process.env.BUSINESS_EMAIL || "support@qwego.com",
+      value: process.env.BUSINESS_EMAIL || "support@lorem-ipsum.com",
     },
     {
       label: "Support Phone",
@@ -64,8 +64,7 @@ export default function AdminDashboardOverview() {
   return (
     <section
       style={{
-        background:
-          "radial-gradient(circle at 85% -10%, #f0f9ff 0%, rgba(240, 249, 255, 0) 45%), linear-gradient(135deg, #0f172a 0%, #1e293b 55%, #0b3b4f 100%)",
+        background: "#0f172a",
         borderRadius: 18,
         color: "#e2e8f0",
         marginBottom: 20,

@@ -7,7 +7,7 @@ type BusinessInfoItem = {
   value: string;
 };
 
-const businessName = process.env.BUSINESS_NAME || "Property Manager";
+const businessName = process.env.BUSINESS_NAME || "Lorem Ipsum Property";
 const businessTagline =
   process.env.BUSINESS_TAGLINE || "Track operations, team performance, and tenant requests in one place.";
 
@@ -15,12 +15,12 @@ const businessInfo: BusinessInfoItem[] = [
   {
     icon: Building2,
     label: "Head Office",
-    value: process.env.BUSINESS_ADDRESS || "221B Baker Street, London NW1",
+    value: process.env.BUSINESS_ADDRESS || "221B Lorem Ipsum, London NW1",
   },
   {
     icon: Mail,
     label: "Support Email",
-    value: process.env.BUSINESS_EMAIL || "support@sky-properties.com",
+    value: process.env.BUSINESS_EMAIL || "support@lorem-ipsum.com",
   },
   {
     icon: Phone,
