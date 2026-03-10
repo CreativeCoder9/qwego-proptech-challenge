@@ -168,3 +168,57 @@ Optional seed in non-production environments only:
 ```bash
 SEED_PASSWORD='ChangeMe-Seed-2026' npm run seed
 ```
+
+## 13) Deploy on Vercel
+
+Use this flow if you want to host the app on Vercel.
+
+### 13.1 Connect Project
+
+1. Push this repository to GitHub/GitLab/Bitbucket.
+2. In Vercel, create a new project and import the repo.
+3. Keep framework preset as **Next.js**.
+
+### 13.2 Configure Environment Variables (Vercel Project Settings)
+
+Set at least:
+
+- `PAYLOAD_SECRET`
+- `DATABASE_URL`
+- `LIBSQL_AUTH_TOKEN` (for secured Turso/libSQL)
+- `APP_BASE_URL` (set to your Vercel production domain)
+
+Set SMTP variables too if you want email notifications:
+
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_SECURE`
+- `SMTP_USER`
+- `SMTP_PASS`
+- `SMTP_FROM_ADDRESS`
+- `SMTP_FROM_NAME`
+
+### 13.3 Database for Vercel
+
+Important:
+
+- Do **not** use local file SQLite (`file:./payload.db`) on Vercel production.
+- Vercel runtime is not appropriate for persistent local DB files.
+- Use Turso/libSQL with `DATABASE_URL=libsql://...` and `LIBSQL_AUTH_TOKEN`.
+
+### 13.4 Build / Output
+
+No custom build command is required beyond defaults:
+
+- Build Command: `npm run build`
+- Install Command: `npm ci` (or Vercel default npm install path)
+
+### 13.5 First Deploy Validation
+
+After production deploy:
+
+1. Open `/` and verify landing page for unauthenticated users.
+2. Open `/admin` and create first account if DB is empty (first user becomes `admin`).
+3. Confirm non-admin users cannot access `/admin`.
+4. Confirm manager/admin can use `/users` People management.
+5. Create a ticket and verify media upload + notifications flow.
