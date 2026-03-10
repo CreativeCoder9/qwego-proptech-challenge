@@ -63,6 +63,11 @@ What seed currently creates:
 - Only users with role `admin` can access the Payload CMS admin portal.
 - The first user created in an empty database is automatically assigned role `admin`.
 
+## People Management (Management Portal)
+
+- Managers and admins can manage tenant and technician accounts in the app portal at `/users`.
+- Managers are scoped to tenant/technician accounts only.
+
 ## Upload Storage
 
 - Media uploads are configured to write under `media`.

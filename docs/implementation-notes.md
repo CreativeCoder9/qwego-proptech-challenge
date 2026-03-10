@@ -15,8 +15,10 @@ The planned MVP scope under `.zenflow/tasks/mvp-for-prime-challenges-proptec-ce1
 
 - Auth + middleware + protected app shell
 - Dashboard (RBAC-aware ticket stats and recent tickets)
+- Public landing page (`/`) for non-authenticated users
 - Ticket create/list/detail flows
 - Manager/technician ticket actions
+- Manager/admin People management for tenant and technician accounts
 - Activity logs and notifications wired from ticket hooks
 - Responsive states (loading, empty, mobile-friendly layouts)
 
@@ -64,7 +66,7 @@ Key constraints are enforced in `src/collections/Tickets.ts`:
 Side effects are hook-driven in `src/hooks/tickets/afterChangeTicket.ts`:
 
 - activity log creation
-- manager notifications on ticket creation
+- admin/manager notifications on ticket creation
 - technician notifications on assignment
 - tenant notifications on completion
 
@@ -73,8 +75,8 @@ Side effects are hook-driven in `src/hooks/tickets/afterChangeTicket.ts`:
 - API passthrough route: `src/app/api/[...slug]/route.ts`
 - Route protection:
   - middleware blocks unauthenticated access to protected routes
-  - auth pages are `/login` and `/register`
-  - authenticated users are redirected away from auth pages to `/dashboard`
+  - public pages are `/`, `/login`, and `/register`
+  - authenticated users are redirected away from public auth pages and `/` to `/dashboard`
 - Protected shell:
   - `src/components/layout/AppShell.tsx`
   - `src/components/layout/Sidebar.tsx`
@@ -82,6 +84,13 @@ Side effects are hook-driven in `src/hooks/tickets/afterChangeTicket.ts`:
 - Route groups:
   - `src/app/(app)` for user-facing app
   - `src/app/(payload)` for Payload admin
+
+## Users and Admin Bootstrapping
+
+- Roles are `tenant | technician | manager | admin`.
+- Payload admin portal access is `admin` only.
+- First created user in an empty DB is forced to `admin`.
+- Managers can create/update/delete tenant and technician users via `/users`.
 
 ## Important Practical Notes
 

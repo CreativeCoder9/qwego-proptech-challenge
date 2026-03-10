@@ -33,6 +33,7 @@ Roles:
 - `tenant`
 - `manager`
 - `technician`
+- `admin`
 
 Primary access implementation:
 
@@ -55,7 +56,7 @@ Hook side effects:
 
 Implemented side effects:
 
-- On create: activity log + manager notifications
+- On create: activity log + admin/manager notifications
 - On assignment change: activity log + assignee notification
 - On status change: activity log + role-targeted notifications
 - On priority change: activity log
@@ -64,6 +65,7 @@ Implemented side effects:
 
 Auth/shell:
 
+- `/` (public landing page for non-authenticated users)
 - `/login`, `/register`
 - `src/app/(app)/layout.tsx`
 - `src/components/layout/AppShell.tsx`
@@ -88,10 +90,17 @@ Notifications:
 - `src/components/notifications/NotificationBell.tsx`
 - `src/components/notifications/NotificationsList.tsx`
 
+People:
+
+- `/users` (manager/admin)
+- `src/components/users/UsersManagementPanel.tsx`
+
 ## Operational Notes
 
 - Root layout `src/app/layout.tsx` is pass-through by design.
 - Toaster is mounted in `src/app/(app)/layout.tsx`.
+- Payload admin UI access is `admin` only.
+- First user in an empty database is automatically assigned `admin`.
 - Ticket create uploads media before creating ticket and performs best-effort cleanup on failure.
 - Notification read updates are best-effort and should not block ticket navigation.
 

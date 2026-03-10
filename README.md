@@ -10,6 +10,7 @@ A full-stack MVP application built for property management, handling tenants, ti
 ## Features
 
 - **Role-based Authentication**: Dashboards and access controls for `admin`, `manager`, `technician`, and `tenant` roles.
+- **People Management**: Managers and admins can manage tenant and technician accounts from the app portal (`/users`).
 - **Ticketing System**: Submit maintenance tickets with images. Managers can assign them and set priorities; technicians can mark them done.
 - **Activity & Auditing**: Every status change or key action generates an activity log timeline.
 - **Notifications**: Internal notification system for users regarding their tickets.

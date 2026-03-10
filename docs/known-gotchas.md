@@ -32,9 +32,12 @@
 
 ## 6) Access control caveat to revisit
 
-- `users.create` is currently open (`() => true`) while `role` field create/update is manager-only.
-- This supports self-registration defaults, but registration UX and server-side role guarantees should be verified when auth flow is implemented.
-- Current register page only creates tenant accounts, but open `users.create` still means API-level hardening should remain a review item.
+- `users.create` is open (`() => true`) to support registration and manager/admin user provisioning.
+- Role assignment is enforced server-side:
+  - first-ever user is forced to `admin`
+  - manager can only create/manage `tenant` and `technician`
+  - `admin` access to Payload CMS is enforced by `users.access.admin`
+- Keep this split in mind when changing auth flows: open create does not imply open privilege escalation.
 
 ## 7) Activity log writes must include denormalized access fields
 
@@ -58,7 +61,7 @@
 
 - `src/app/(app)/tickets/[id]/page.tsx` is now a full detail route with:
   - details card
-  - manager actions (assign technician, update status/priority)
+  - admin/manager actions (assign technician, update status/priority)
   - technician actions (progress assigned ticket)
   - activity timeline
 - If you expand ticket actions, keep logic aligned with server validations in `src/collections/Tickets.ts`.

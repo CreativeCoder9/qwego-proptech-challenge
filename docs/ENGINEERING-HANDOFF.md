@@ -17,7 +17,7 @@ This handoff captures the current, implemented system behavior for the next engi
 - Collections in `payload.config.ts`:
   - `users`, `media`, `tickets`, `activity-logs`, `notifications`
 - Role model:
-  - `tenant | manager | technician`
+  - `tenant | manager | technician | admin`
 - Access logic:
   - `src/collections/Users.ts`
   - `src/collections/Tickets.ts`
@@ -34,12 +34,12 @@ This handoff captures the current, implemented system behavior for the next engi
 - Includes:
   - strict status transitions
     - `open -> assigned -> in-progress -> done`
-    - `open -> done` is allowed for manager fast-close
+    - `open -> done` is allowed for admin/manager fast-close
   - assignment/status consistency checks
     - `in-progress` requires an assignee
     - `done` can be set without assignee from `open`
   - activity log generation
-  - manager/technician/tenant notifications based on event type
+  - admin/manager/technician/tenant notifications based on event type
 
 ### Auth and route protection
 
@@ -64,6 +64,7 @@ This handoff captures the current, implemented system behavior for the next engi
   - `src/components/layout/Sidebar.tsx`
   - `src/components/layout/Header.tsx`
 - Dashboard:
+  - `src/app/(app)/page.tsx` (public landing for non-authenticated users)
   - `src/app/(app)/dashboard/page.tsx`
   - `src/components/dashboard/StatsCards.tsx`
   - `src/components/dashboard/RecentTickets.tsx`
@@ -76,6 +77,9 @@ This handoff captures the current, implemented system behavior for the next engi
   - `src/app/(app)/notifications/page.tsx`
   - `src/components/notifications/NotificationBell.tsx`
   - `src/components/notifications/NotificationsList.tsx`
+- People management:
+  - `src/app/(app)/users/page.tsx`
+  - `src/components/users/UsersManagementPanel.tsx`
 
 ## Important Runtime Notes
 
@@ -87,11 +91,17 @@ This handoff captures the current, implemented system behavior for the next engi
 
 ## Middleware behavior
 
-- Middleware treats `/login` and `/register` as auth pages.
+- Middleware treats `/`, `/login`, and `/register` as public pages.
 - Unauthenticated users are redirected to `/login?next=...`.
-- Requests to `/` use `next=/dashboard` to avoid an extra hop after login.
+- Authenticated users on `/` and auth pages are redirected to `/dashboard`.
 - Authenticated users on auth pages are redirected to `/dashboard`.
 - Middleware validates cookie presence, not token validity (server checks happen in Payload routes).
+
+## Users management model
+
+- Payload admin UI (`/admin`) is `admin` role only.
+- First user in empty DB is auto-assigned `admin`.
+- Managers can manage only tenant and technician users through app portal `/users`.
 
 ## Query safety pattern
 

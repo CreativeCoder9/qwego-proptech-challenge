@@ -12,6 +12,7 @@ export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || "dev-secret-change-me",
   db: sqliteAdapter({
     client: {
+      authToken: process.env.LIBSQL_AUTH_TOKEN || undefined,
       url: process.env.DATABASE_URL || "file:./payload.db",
     },
   }),
